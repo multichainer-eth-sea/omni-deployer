@@ -21,8 +21,11 @@ export class EvmClientAdapter implements IClientAdapter {
   public async getGasBalance(): Promise<string> {
     const address = await this.getAddress();
     const balance = await this.ethersProvider.getBalance(address);
+    const decimals = this.getNetworkMetadata().gasDecimals;
 
-    return balance.toString();
+    const balanceFmt = ethers.formatUnits(balance, decimals);
+
+    return balanceFmt;
   }
 
   public async getGasCoinData(): Promise<GetGasCoinDataReturns> {
