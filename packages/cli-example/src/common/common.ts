@@ -37,7 +37,7 @@ export function prepareSolanaClient(
   blockExplorerUrl: string,
 ) {
   const connection = new web3.Connection(
-    web3.clusterApiUrl('devnet'),
+    web3.clusterApiUrl('mainnet-beta'),
     'confirmed',
   );
   const secretKey = bs58.decode(privateKey);
@@ -48,7 +48,7 @@ export function prepareSolanaClient(
     networkMetadata: {
       gasTicker: 'SOL',
       blockExplorerUrl,
-      gasDecimals: 8,
+      gasDecimals: 9,
       gasPriceCoingeckoId: 'solana',
     },
   });
