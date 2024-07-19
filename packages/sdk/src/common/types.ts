@@ -1,3 +1,5 @@
+import { IClientAdapter } from '../client-adapter';
+
 export enum CoinChain {
   ARBITRUM = 'arbitrum',
   OPTIMISM = 'optimism',
@@ -14,4 +16,4 @@ export type SdkConstructorParams = {
   clientMap: ClientMap;
 };
 
-export type ClientMap = Partial<Record<CoinChain, any>>;
+export type ClientMap = Partial<Record<CoinChain, IClientAdapter>>;
