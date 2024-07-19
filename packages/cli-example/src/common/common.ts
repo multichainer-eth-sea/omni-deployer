@@ -9,6 +9,8 @@ import {
 import { ethers } from 'ethers';
 import { config } from '../config';
 import { Account, Ed25519PrivateKey } from '@aptos-labs/ts-sdk';
+import web3 from '@solana/web3.js';
+import bs58 from 'bs58';
 
 export function prepareEvmClient(
   rpcUrl: string,
@@ -30,20 +32,34 @@ export function prepareEvmClient(
   });
 }
 
-export function prepareSolanaClient(blockExplorerUrl: string) {
+export function prepareSolanaClient(
+  privateKey: string,
+  blockExplorerUrl: string,
+) {
+  const connection = new web3.Connection(
+    web3.clusterApiUrl('devnet'),
+    'confirmed',
+  );
+  const secretKey = bs58.decode(privateKey);
+  const keypair = web3.Keypair.fromSecretKey(secretKey);
   return new SolClientAdapter({
+    solanaConnection: connection,
+    solanaKeypair: keypair,
     networkMetadata: {
       gasTicker: 'SOL',
       blockExplorerUrl,
-      gasDecimals: 18,
+      gasDecimals: 8,
       gasPriceCoingeckoId: 'solana',
     },
   });
 }
 
-export function prepareAptosClient(blockExplorerUrl: string) {
+export function prepareAptosClient(
+  privateKey: string,
+  blockExplorerUrl: string,
+) {
   const aptosAccount = Account.fromPrivateKey({
-    privateKey: new Ed25519PrivateKey(config.APTOS_PRIVATE_KEY),
+    privateKey: new Ed25519PrivateKey(privateKey),
   });
 
   return new AptClientAdapter({
@@ -69,8 +85,14 @@ export function prepareSdk() {
       config.ARBITRUM_PRIVATE_KEY,
       'https://optimistic.etherscan.io/',
     ),
-    [CoinChain.SOLANA]: prepareSolanaClient('https://solscan.io/'),
-    [CoinChain.APTOS]: prepareAptosClient('https://aptoscan.com/'),
+    [CoinChain.SOLANA]: prepareSolanaClient(
+      config.SOLANA_PRIVATE_KEY,
+      'https://solscan.io/',
+    ),
+    [CoinChain.APTOS]: prepareAptosClient(
+      config.APTOS_PRIVATE_KEY,
+      'https://aptoscan.com/',
+    ),
   };
 
   const sdk = new Sdk({ clientMap });
