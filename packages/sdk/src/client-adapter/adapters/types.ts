@@ -1,5 +1,6 @@
 import { Account } from '@aptos-labs/ts-sdk';
 import { ethers } from 'ethers';
+import { Connection, Keypair } from '@solana/web3.js';
 
 export type NetworkMetadata = {
   blockExplorerUrl: string;
@@ -15,6 +16,8 @@ export type EvmClientAdapterConstructorParams = {
 };
 
 export type SolanaClientAdapterConstructorparams = {
+  solanaConnection: Connection;
+  solanaKeypair: Keypair;
   networkMetadata: NetworkMetadata;
 };
 

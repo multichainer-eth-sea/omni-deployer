@@ -1,20 +1,27 @@
 import { getCoinPriceById } from '../../common/coin-price';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { NetworkMetadata, SolanaClientAdapterConstructorparams } from './types';
+import { Keypair, Connection, PublicKey } from '@solana/web3.js';
 
 export class SolClientAdapter implements IClientAdapter {
   private networkMetadata: NetworkMetadata;
+  private solanaKeypair: Keypair;
+  private solanaConnection: Connection;
 
   constructor(params: SolanaClientAdapterConstructorparams) {
     this.networkMetadata = params.networkMetadata;
+    this.solanaKeypair = params.solanaKeypair;
+    this.solanaConnection = params.solanaConnection;
   }
 
   public async getAddress(): Promise<string> {
-    return '';
+    const address = this.getPublicKey().toString();
+    return address;
   }
 
   public async getGasBalance(): Promise<string> {
-    return '1';
+    const balance = await this.solanaConnection.getBalance(this.getPublicKey());
+    return balance.toString();
   }
 
   public async getGasCoinData(): Promise<GetGasCoinDataReturns> {
@@ -28,5 +35,9 @@ export class SolClientAdapter implements IClientAdapter {
 
   public getNetworkMetadata(): NetworkMetadata {
     return this.networkMetadata;
+  }
+
+  private getPublicKey(): PublicKey {
+    return this.solanaKeypair.publicKey;
   }
 }
