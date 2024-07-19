@@ -1,2 +1,2 @@
-export * from './omni-deployer';
-export * from './types';
+export * from './sdk';
+export * from './coin-manager';
