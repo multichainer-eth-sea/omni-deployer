@@ -4,7 +4,9 @@
   "description": "",
   "keywords": [],
   "scripts": {
-    "format": "prettier --write \"packages/**/src/**/*.ts\" "
+    "format": "prettier --write \"packages/**/src/**/*.ts\" ",
+    "build": "pnpm -r run build",
+    "example": "pnpm --filter \"@omni-deployer/cli-examples\" -r run example"
   },
   "author": "",
   "license": "ISC",
