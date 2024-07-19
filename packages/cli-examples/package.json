@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "example": "ts-node src/index.ts",
     "test": "vitest",
     "format": "prettier --write ."
   },
