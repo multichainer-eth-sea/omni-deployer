@@ -16,7 +16,7 @@ importers:
       typescript: 5.5.3
       vitest: 2.0.3_@types+node@20.14.11
 
-  packages/cli-example:
+  packages/cli-examples:
     specifiers:
       '@aptos-labs/ts-sdk': ^1.26.0
       '@omni-deployer/sdk': workspace:*
@@ -37,22 +37,6 @@ importers:
       commander: 12.1.0
       dotenv: 16.4.5
       ethers: 6.13.1
-    devDependencies:
-      '@omni-deployer/sdk': link:../sdk
-      '@types/node': 20.14.11
-      prettier: 3.3.3
-      ts-node: 10.9.2_ynyb4mthmwaqwvqx3omcdfis74
-      typescript: 5.5.3
-      vitest: 2.0.3_@types+node@20.14.11
-
-  packages/interface:
-    specifiers:
-      '@omni-deployer/sdk': workspace:*
-      '@types/node': ^20.14.10
-      prettier: ^3.3.3
-      ts-node: ^10.9.2
-      typescript: ^5.5.3
-      vitest: ^2.0.3
     devDependencies:
       '@omni-deployer/sdk': link:../sdk
       '@types/node': 20.14.11
