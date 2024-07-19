@@ -1,22 +1,25 @@
 # Omni Deployer
 
+## Prerequisites
+-   Node.js v20+
+-   pnpm v9+
+
+```sh
+# install pnpm if you haven't already
+$ npm i -g pnpm
+```
+
 ## Preparation
 
-First build the SDK
-```
+First install and build the SDK
+```sh
 $ pnpm install
-
-$ cd packages/sdk
 $ pnpm build
 ```
 
-Then move to `cli-example` package
-```
-$ cd ../cli-example
-```
-
-Fill the .env in `cli-example`
-```
+Fill the .env in `cli-examples` package
+```sh
+$ cd packages/cli-examples
 $ cp .env.example .env
 $ vim .env
 ```
@@ -24,8 +27,8 @@ $ vim .env
 ## Running the Example
 
 Run the example
-```
-$ pnpm dev get-gas-balances
+```sh
+$ pnpm example get-gas-balances
 ```
 
 Result
