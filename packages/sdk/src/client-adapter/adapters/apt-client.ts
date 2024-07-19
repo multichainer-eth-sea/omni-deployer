@@ -1,3 +1,4 @@
+import { getCoinPriceById } from '../../common/coin-price';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { NetworkMetadata } from './types';
 
@@ -7,14 +8,15 @@ export class AptClientAdapter implements IClientAdapter {
   }
 
   public async getGasBalance(): Promise<string> {
-    return '';
+    return '1';
   }
 
   public async getGasCoinData(): Promise<GetGasCoinDataReturns> {
-    const ticker = this.getNetworkMetadata().gasTicker;
+    const { gasTicker, gasPriceCoingeckoId } = this.getNetworkMetadata();
+    const priceUsd = await getCoinPriceById(`coingecko:${gasPriceCoingeckoId}`);
     return {
-      ticker: ticker,
-      priceUsd: '7.5',
+      ticker: gasTicker,
+      priceUsd: priceUsd.toString(),
     };
   }
 

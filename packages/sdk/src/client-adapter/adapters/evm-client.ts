@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { EvmClientAdapterConstructorParams, NetworkMetadata } from './types';
+import { getCoinPriceById } from '../../common/coin-price';
 
 export class EvmClientAdapter implements IClientAdapter {
   private ethersSigner: ethers.Signer;
@@ -29,9 +30,11 @@ export class EvmClientAdapter implements IClientAdapter {
   }
 
   public async getGasCoinData(): Promise<GetGasCoinDataReturns> {
+    const { gasTicker, gasPriceCoingeckoId } = this.getNetworkMetadata();
+    const priceUsd = await getCoinPriceById(`coingecko:${gasPriceCoingeckoId}`);
     return {
-      ticker: this.networkMetadata.gasTicker,
-      priceUsd: '3000', // TODO(dims): get the real price from coingecko
+      ticker: gasTicker,
+      priceUsd: priceUsd.toString(),
     };
   }
 
