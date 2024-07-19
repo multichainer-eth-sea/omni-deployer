@@ -38,10 +38,6 @@ export class EvmClientAdapter implements IClientAdapter {
     };
   }
 
-  public getChainExplorer(): string {
-    return this.networkMetadata.blockExplorerUrl;
-  }
-
   public getNetworkMetadata(): NetworkMetadata {
     return this.networkMetadata;
   }

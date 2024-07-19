@@ -12,3 +12,11 @@ export type EvmClientAdapterConstructorParams = {
   ethersProvider: ethers.Provider;
   networkMetadata: NetworkMetadata;
 };
+
+export type SolanaClientAdapterConstructorparams = {
+  networkMetadata: NetworkMetadata;
+};
+
+export type AptosClientAdapterConstructorparams = {
+  networkMetadata: NetworkMetadata;
+};

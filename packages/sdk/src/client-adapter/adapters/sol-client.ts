@@ -1,8 +1,14 @@
 import { getCoinPriceById } from '../../common/coin-price';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
-import { NetworkMetadata } from './types';
+import { NetworkMetadata, SolanaClientAdapterConstructorparams } from './types';
 
 export class SolClientAdapter implements IClientAdapter {
+  private networkMetadata: NetworkMetadata;
+
+  constructor(params: SolanaClientAdapterConstructorparams) {
+    this.networkMetadata = params.networkMetadata;
+  }
+
   public async getAddress(): Promise<string> {
     return '';
   }
@@ -21,11 +27,6 @@ export class SolClientAdapter implements IClientAdapter {
   }
 
   public getNetworkMetadata(): NetworkMetadata {
-    return {
-      gasTicker: 'SOL',
-      blockExplorerUrl: 'https://solscan.io/',
-      gasPriceCoingeckoId: 'solana',
-      gasDecimals: 18,
-    };
+    return this.networkMetadata;
   }
 }

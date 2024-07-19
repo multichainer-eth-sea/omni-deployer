@@ -29,6 +29,28 @@ export function prepareEvmClient(
   });
 }
 
+export function prepareSolanaClient(blockExplorerUrl: string) {
+  return new SolClientAdapter({
+    networkMetadata: {
+      gasTicker: 'SOL',
+      blockExplorerUrl,
+      gasDecimals: 18,
+      gasPriceCoingeckoId: 'solana',
+    },
+  });
+}
+
+export function prepareAptosClient(blockExplorerUrl: string) {
+  return new AptClientAdapter({
+    networkMetadata: {
+      gasTicker: 'APT',
+      blockExplorerUrl,
+      gasDecimals: 18,
+      gasPriceCoingeckoId: 'aptos',
+    },
+  });
+}
+
 export function prepareSdk() {
   const clientMap: ClientMap = {
     [CoinChain.ARBITRUM]: prepareEvmClient(
@@ -41,8 +63,8 @@ export function prepareSdk() {
       config.ARBITRUM_PRIVATE_KEY,
       'https://optimistic.etherscan.io/',
     ),
-    [CoinChain.SOLANA]: new SolClientAdapter(),
-    [CoinChain.APTOS]: new AptClientAdapter(),
+    [CoinChain.SOLANA]: prepareSolanaClient('https://solscan.io/'),
+    [CoinChain.APTOS]: prepareAptosClient('https://aptoscan.com/'),
   };
 
   const sdk = new Sdk({ clientMap });

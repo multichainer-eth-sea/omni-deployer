@@ -1,8 +1,14 @@
 import { getCoinPriceById } from '../../common/coin-price';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
-import { NetworkMetadata } from './types';
+import { AptosClientAdapterConstructorparams, NetworkMetadata } from './types';
 
 export class AptClientAdapter implements IClientAdapter {
+  private networkMetadata: NetworkMetadata;
+
+  constructor(params: AptosClientAdapterConstructorparams) {
+    this.networkMetadata = params.networkMetadata;
+  }
+
   public async getAddress(): Promise<string> {
     return '';
   }
@@ -21,11 +27,6 @@ export class AptClientAdapter implements IClientAdapter {
   }
 
   public getNetworkMetadata(): NetworkMetadata {
-    return {
-      gasTicker: 'APT',
-      blockExplorerUrl: 'https://aptos.io',
-      gasPriceCoingeckoId: 'aptos',
-      gasDecimals: 18,
-    };
+    return this.networkMetadata;
   }
 }
