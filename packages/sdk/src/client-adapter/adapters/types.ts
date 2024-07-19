@@ -1,3 +1,4 @@
+import { Account } from '@aptos-labs/ts-sdk';
 import { ethers } from 'ethers';
 
 export type NetworkMetadata = {
@@ -18,5 +19,6 @@ export type SolanaClientAdapterConstructorparams = {
 };
 
 export type AptosClientAdapterConstructorparams = {
+  aptosAccount: Account;
   networkMetadata: NetworkMetadata;
 };
