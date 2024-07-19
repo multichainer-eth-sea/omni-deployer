@@ -8,6 +8,7 @@ import {
 } from '@omni-deployer/sdk';
 import { ethers } from 'ethers';
 import { config } from '../config';
+import { Account, Ed25519PrivateKey } from '@aptos-labs/ts-sdk';
 
 export function prepareEvmClient(
   rpcUrl: string,
@@ -41,11 +42,16 @@ export function prepareSolanaClient(blockExplorerUrl: string) {
 }
 
 export function prepareAptosClient(blockExplorerUrl: string) {
+  const aptosAccount = Account.fromPrivateKey({
+    privateKey: new Ed25519PrivateKey(config.APTOS_PRIVATE_KEY),
+  });
+
   return new AptClientAdapter({
+    aptosAccount,
     networkMetadata: {
       gasTicker: 'APT',
       blockExplorerUrl,
-      gasDecimals: 18,
+      gasDecimals: 8,
       gasPriceCoingeckoId: 'aptos',
     },
   });

@@ -1,4 +1,9 @@
-import { CoinChain, SdkConstructorParams, ClientMap } from '../common';
+import {
+  CoinChain,
+  SdkConstructorParams,
+  ClientMap,
+  valueToBigNumber,
+} from '../common';
 
 import { GasBalance, GetGasBalancesReturns, IWalletManager } from './types';
 
@@ -18,8 +23,9 @@ export class WalletManager implements IWalletManager {
     const gasBalance = await client.getGasBalance();
     const walletAddress = await client.getAddress();
     const gasCoinData = await client.getGasCoinData();
-    const balanceUsd =
-      parseFloat(gasBalance) * parseFloat(gasCoinData.priceUsd);
+    const balanceUsd = valueToBigNumber(gasBalance)
+      .multipliedBy(gasCoinData.priceUsd)
+      .toFixed(2);
 
     return {
       chain,
