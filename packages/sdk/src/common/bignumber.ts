@@ -48,4 +48,3 @@ export function denormalizeBN(n: BigNumberValue, decimals: number): BigNumber {
 }
 
 export const BN_ONE_18_DECIMALS = denormalizeBN(1, 18);
-
