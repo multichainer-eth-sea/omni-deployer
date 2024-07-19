@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.26.0",
+    "@solana/web3.js": "^1.95.1",
     "bignumber.js": "^9.1.2",
     "ethers": "^6.13.1"
   }
