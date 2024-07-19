@@ -12,14 +12,12 @@ export class CoinManager implements ICoinManager {
   private clientMap: ClientMap;
 
   constructor(params: SdkConstructorParams) {
-    console.log('sdk constructor params:', params);
     this.clientMap = params.clientMap;
   }
 
   public async deployCoinSingleChain(
     params: DeployCoinSingleChainParams,
   ): Promise<DeployCoinReturns> {
-    console.log('deploying coin at chain:', params.chain);
     return {
       coinName: params.coinName,
       coinTicker: params.coinTicker,
@@ -39,10 +37,6 @@ export class CoinManager implements ICoinManager {
   public async deployCoinMultiChain(
     params: DeployCoinMultiChainParams,
   ): Promise<DeployCoinReturns> {
-    console.log(
-      'deploying coin at chains:',
-      params.chains.map((c) => c.chain),
-    );
     return {
       coinName: params.coinName,
       coinTicker: params.coinTicker,
@@ -66,12 +60,6 @@ export class CoinManager implements ICoinManager {
   public async bridgeCoin(
     params: BridgeCoinParams,
   ): Promise<BridgeCoinReturns> {
-    console.log(
-      'bridging coin from chain:',
-      params.fromChain,
-      'to chain:',
-      params.toChain,
-    );
     return {
       fromChain: params.fromChain,
       toChain: params.toChain,

@@ -8,7 +8,6 @@ export class Sdk {
   public readonly wallet: IWalletManager;
 
   constructor(params: SdkConstructorParams) {
-    console.log('sdk constructor params:', params);
     this.clientMap = params.clientMap;
 
     this.coin = new CoinManager({ clientMap: this.clientMap });
