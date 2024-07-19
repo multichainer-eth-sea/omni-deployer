@@ -10,38 +10,40 @@ export class WalletManager implements IWalletManager {
   }
 
   public async getGasBalance(chain: CoinChain): Promise<GasBalance> {
+    if (!this.clientMap[chain]) {
+      throw new Error(`Client not found for chain: ${chain}`);
+    }
+
+    const client = this.clientMap[chain];
+    const gasBalance = await client.getGasBalance();
+    const walletAddress = await client.getAddress();
+    const gasCoinData = await client.getGasCoinData();
+    const balanceUsd =
+      parseFloat(gasBalance) * parseFloat(gasCoinData.priceUsd);
+
     return {
       chain,
-      walletAddress: '0x1234567890',
-      balance: '1000000000000000000',
-      balanceUsd: '1000',
-      gasTicker: 'ETH',
+      walletAddress: walletAddress,
+      balance: gasBalance,
+      balanceUsd: balanceUsd.toString(),
+      gasTicker: gasCoinData.ticker,
     };
   }
 
   public async getGasBalances(): Promise<GetGasBalancesReturns> {
-    return {
-      [CoinChain.ARBITRUM]: {
-        chain: CoinChain.ARBITRUM,
-        walletAddress: '0x1234567890',
-        balance: '1000000000000000000',
-        balanceUsd: '1000',
-        gasTicker: 'ETH',
-      },
-      [CoinChain.APTOS]: {
-        chain: CoinChain.APTOS,
-        walletAddress: '0x1234567890',
-        balance: '1000000000000000000',
-        balanceUsd: '1000',
-        gasTicker: 'APT',
-      },
-      [CoinChain.SOLANA]: {
-        chain: CoinChain.SOLANA,
-        walletAddress: '0x1234567890',
-        balance: '1000000000000000000',
-        balanceUsd: '1000',
-        gasTicker: 'SOL',
-      },
-    };
+    const chains = Object.keys(this.clientMap);
+    const gasBalances = await Promise.all(
+      chains.map(async (chain) => {
+        return this.getGasBalance(chain as CoinChain);
+      }),
+    );
+    const gasBalancesMap = gasBalances.reduce(
+      (acc, gasBalance) => ({
+        ...acc,
+        [gasBalance.chain]: gasBalance,
+      }),
+      {} as GetGasBalancesReturns,
+    );
+    return gasBalancesMap;
   }
 }
