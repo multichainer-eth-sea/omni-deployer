@@ -1,3 +1,4 @@
+import { normalizeBN, valueToBigNumber } from '../../common';
 import { getCoinPriceById } from '../../common/coin-price';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { NetworkMetadata, SolanaClientAdapterConstructorparams } from './types';
@@ -21,7 +22,10 @@ export class SolClientAdapter implements IClientAdapter {
 
   public async getGasBalance(): Promise<string> {
     const balance = await this.solanaConnection.getBalance(this.getPublicKey());
-    return balance.toString();
+    const balanceBN = valueToBigNumber(balance.toString());
+    const decimals = this.getNetworkMetadata().gasDecimals;
+    const balanceFmt = normalizeBN(balanceBN, decimals).toString();
+    return balanceFmt;
   }
 
   public async getGasCoinData(): Promise<GetGasCoinDataReturns> {
