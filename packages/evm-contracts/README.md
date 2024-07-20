@@ -3,7 +3,7 @@
 ## How to deploy a coin
 
 modify the coin metadata on this `./ignition/parameters.json`
-```
+```json
 {
   "MyCoin": {
     "name": "Gud Coin",
