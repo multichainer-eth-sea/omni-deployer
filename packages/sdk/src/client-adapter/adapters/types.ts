@@ -1,4 +1,4 @@
-import { Account } from '@aptos-labs/ts-sdk';
+import { Account, Aptos } from '@aptos-labs/ts-sdk';
 import { ethers } from 'ethers';
 import { Connection, Keypair } from '@solana/web3.js';
 
@@ -22,6 +22,7 @@ export type SolanaClientAdapterConstructorparams = {
 };
 
 export type AptosClientAdapterConstructorparams = {
+  aptosClient: Aptos;
   aptosAccount: Account;
   networkMetadata: NetworkMetadata;
 };
