@@ -3,6 +3,10 @@ import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { AptosClientAdapterConstructorparams, NetworkMetadata } from './types';
 import { Account, Aptos } from '@aptos-labs/ts-sdk';
 import { normalizeBN, valueToBigNumber } from '../../common';
+import {
+  DeployCoinReturnsReport,
+  DeployCoinSingleChainParams,
+} from '../../coin-manager';
 
 export class AptClientAdapter implements IClientAdapter {
   private networkMetadata: NetworkMetadata;
@@ -49,5 +53,16 @@ export class AptClientAdapter implements IClientAdapter {
 
   public getNetworkMetadata(): NetworkMetadata {
     return this.networkMetadata;
+  }
+
+  public async deployCoin(
+    params: DeployCoinSingleChainParams,
+  ): Promise<DeployCoinReturnsReport> {
+    return {
+      chain: params.chain,
+      amount: params.coinTotalSupply,
+      receiptAddress: params.receiptAddress,
+      txHash: '0x-aptos-hash',
+    };
   }
 }

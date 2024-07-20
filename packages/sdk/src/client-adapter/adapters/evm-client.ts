@@ -2,6 +2,10 @@ import { ethers } from 'ethers';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { EvmClientAdapterConstructorParams, NetworkMetadata } from './types';
 import { getCoinPriceById } from '../../common/coin-price';
+import {
+  DeployCoinReturnsReport,
+  DeployCoinSingleChainParams,
+} from '../../coin-manager';
 
 export class EvmClientAdapter implements IClientAdapter {
   private ethersSigner: ethers.Signer;
@@ -40,5 +44,16 @@ export class EvmClientAdapter implements IClientAdapter {
 
   public getNetworkMetadata(): NetworkMetadata {
     return this.networkMetadata;
+  }
+
+  public async deployCoin(
+    params: DeployCoinSingleChainParams,
+  ): Promise<DeployCoinReturnsReport> {
+    return {
+      chain: params.chain,
+      amount: params.coinTotalSupply,
+      receiptAddress: params.receiptAddress,
+      txHash: `0x-${params.chain}-hash`,
+    };
   }
 }

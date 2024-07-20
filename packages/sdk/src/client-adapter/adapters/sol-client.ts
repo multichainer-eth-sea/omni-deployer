@@ -3,6 +3,10 @@ import { getCoinPriceById } from '../../common/coin-price';
 import { GetGasCoinDataReturns, IClientAdapter } from '../types';
 import { NetworkMetadata, SolanaClientAdapterConstructorparams } from './types';
 import { Keypair, Connection, PublicKey } from '@solana/web3.js';
+import {
+  DeployCoinReturnsReport,
+  DeployCoinSingleChainParams,
+} from '../../coin-manager';
 
 export class SolClientAdapter implements IClientAdapter {
   private networkMetadata: NetworkMetadata;
@@ -43,5 +47,16 @@ export class SolClientAdapter implements IClientAdapter {
 
   private getPublicKey(): PublicKey {
     return this.solanaKeypair.publicKey;
+  }
+
+  public async deployCoin(
+    params: DeployCoinSingleChainParams,
+  ): Promise<DeployCoinReturnsReport> {
+    return {
+      chain: params.chain,
+      amount: params.coinTotalSupply,
+      receiptAddress: params.receiptAddress,
+      txHash: '0x-solana-hash',
+    };
   }
 }
