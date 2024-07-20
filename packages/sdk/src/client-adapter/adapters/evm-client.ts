@@ -51,7 +51,7 @@ export class EvmClientAdapter implements IClientAdapter {
     params: DeployCoinSingleChainParams,
   ): Promise<DeployCoinReturnsReport> {
     // TODO(dims): tidy up this
-    //
+
     const deployerAddress = this.getOmniDeployerAddress(params.chain);
     const deployerContract = new ethers.Contract(
       deployerAddress,
@@ -78,6 +78,7 @@ export class EvmClientAdapter implements IClientAdapter {
   private getOmniDeployerAddress(chain: CoinChain): string {
     const omnicoinDeployerAddressMap: Partial<Record<CoinChain, string>> = {
       [CoinChain.ARBITRUM]: '0x3c790c7f9ffa4c3290ed05df5cff39748b77dbf7',
+      [CoinChain.OPTIMISM]: '0x08a0864095934625e27125Aa8E094C736aaF9fB7',
     };
 
     const deployerAddress = omnicoinDeployerAddressMap[chain];

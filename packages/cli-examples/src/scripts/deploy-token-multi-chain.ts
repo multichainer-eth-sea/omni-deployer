@@ -4,8 +4,8 @@ import { prepareSdk } from '../common';
 const runDeployTokenMultiChain = async () => {
   const sdk = prepareSdk();
   const result = await sdk.coin.deployCoinMultiChain({
-    coinName: '1-Test-Coin',
-    coinTicker: '1-TEST',
+    coinName: '2-Multi-Chain-Coin',
+    coinTicker: '2-TEST',
     coinTotalSupply: '1000000000000000000000000',
     coinDecimals: '18',
     chains: [

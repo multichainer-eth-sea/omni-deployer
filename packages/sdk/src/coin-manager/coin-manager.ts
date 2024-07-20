@@ -45,7 +45,7 @@ export class CoinManager implements ICoinManager {
         chain: chainData.chain,
         coinName: params.coinName,
         coinTicker: params.coinTicker,
-        coinTotalSupply: params.coinTotalSupply,
+        coinTotalSupply: chainData.amount,
         coinDecimals: params.coinDecimals,
         receiptAddress: chainData.receiptAddress,
       });
