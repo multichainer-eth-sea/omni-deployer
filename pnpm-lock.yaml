@@ -54,6 +54,7 @@ importers:
       '@nomicfoundation/hardhat-network-helpers': ^1.0.0
       '@nomicfoundation/hardhat-toolbox': ^5.0.0
       '@nomicfoundation/hardhat-verify': ^2.0.0
+      '@openzeppelin/contracts': ^5.0.2
       '@typechain/ethers-v6': ^0.5.0
       '@typechain/hardhat': ^9.0.0
       '@types/chai': ^4.2.0
@@ -66,6 +67,7 @@ importers:
       solidity-coverage: ^0.8.1
       typechain: ^8.3.0
     dependencies:
+      '@openzeppelin/contracts': 5.0.2
       dotenv: 16.4.5
     devDependencies:
       '@nomicfoundation/hardhat-chai-matchers': 2.0.7_gdud2rlfa3j4cvk56vlbxn67ty
@@ -1128,6 +1130,10 @@ packages:
       '@nomicfoundation/solidity-analyzer-linux-x64-musl': 0.1.2
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.2
     dev: true
+
+  /@openzeppelin/contracts/5.0.2:
+    resolution: {integrity: sha512-ytPc6eLGcHHnapAZ9S+5qsdomhjo6QBHTDRRBFfTxXIpsicMhVPouPgmUPebZZZGX7vt9USA+Z+0M0dSVtSUEA==}
+    dev: false
 
   /@rollup/rollup-android-arm-eabi/4.18.1:
     resolution: {integrity: sha512-lncuC4aHicncmbORnx+dUaAgzee9cm/PbIqgWz1PpXuwc+sa1Ct83tnqUDy/GFKleLiN7ZIeytM6KJ4cAn1SxA==}
