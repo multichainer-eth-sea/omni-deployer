@@ -1,0 +1,8 @@
+{
+  "MyCoin": {
+    "name": "Gud Coin",
+    "symbol": "GUD",
+    "decimals": "18",
+    "totalSupply": "1000000000000000000000000000"
+  }
+}
