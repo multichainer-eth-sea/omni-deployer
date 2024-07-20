@@ -17,5 +17,5 @@ modify the coin metadata on this `./ignition/parameters.json`
 then run this
 ```sh
 pnpm build
-pnpm deploy:coin --network arbitrum
+pnpm deploy:coin --network arbitrum --verify
 ```
