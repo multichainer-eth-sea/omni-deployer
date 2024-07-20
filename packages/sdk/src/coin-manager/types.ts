@@ -31,14 +31,14 @@ export type DeployCoinSingleChainParams = DeployCoinParams & {
   receiptAddress: string;
 };
 
+export type DeployCoinMultiChainParams = DeployCoinParams & {
+  chains: DeployCoinChainConfig[];
+};
+
 export type DeployCoinChainConfig = {
   chain: CoinChain;
   amount: string;
   receiptAddress: string;
-};
-
-export type DeployCoinMultiChainParams = DeployCoinParams & {
-  chains: DeployCoinChainConfig[];
 };
 
 export type DeployCoinReturnsReport = DeployCoinChainConfig & {
