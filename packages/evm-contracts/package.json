@@ -1,6 +1,8 @@
 {
   "name": "@omni-deployer/evm-contracts",
   "scripts": {
+    "build": "hardhat compile",
+    "deploy:lock": "npx hardhat ignition deploy ./ignition/modules/Lock.ts",
     "format": "prettier --write ."
   },
   "devDependencies": {
