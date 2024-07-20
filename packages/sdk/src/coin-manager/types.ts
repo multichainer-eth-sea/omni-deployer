@@ -22,8 +22,8 @@ export type BridgeCoinParams = {
 export type DeployCoinParams = {
   coinName: string;
   coinTicker: string;
-  coinTotalSupply: number;
-  coinDecimals: number;
+  coinTotalSupply: string;
+  coinDecimals: string;
 };
 
 export type DeployCoinSingleChainParams = DeployCoinParams & {
@@ -33,7 +33,7 @@ export type DeployCoinSingleChainParams = DeployCoinParams & {
 
 export type DeployCoinChainConfig = {
   chain: CoinChain;
-  amount: number;
+  amount: string;
   receiptAddress: string;
 };
 
