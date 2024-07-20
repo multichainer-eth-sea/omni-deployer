@@ -1,8 +1,9 @@
 import { CoinManager, ICoinManager } from './coin-manager';
 import { IWalletManager, WalletManager } from './wallet-manager';
-import { ClientMap, SdkConstructorParams } from './common';
+import { ClientMap, CoinChain, SdkConstructorParams } from './common';
+import { ISdk } from './types';
 
-export class Sdk {
+export class Sdk implements ISdk {
   private clientMap: ClientMap;
   public readonly coin: ICoinManager;
   public readonly wallet: IWalletManager;
@@ -10,7 +11,18 @@ export class Sdk {
   constructor(params: SdkConstructorParams) {
     this.clientMap = params.clientMap;
 
-    this.coin = new CoinManager({ clientMap: this.clientMap });
-    this.wallet = new WalletManager({ clientMap: this.clientMap });
+    this.coin = new CoinManager({ sdk: this });
+    this.wallet = new WalletManager({ sdk: this });
+  }
+
+  public getClient(chain: CoinChain) {
+    if (!this.clientMap[chain]) {
+      throw new Error(`Client not found for chain: ${chain}`);
+    }
+    return this.clientMap[chain];
+  }
+
+  public getAllChains(): CoinChain[] {
+    return Object.keys(this.clientMap) as CoinChain[];
   }
 }

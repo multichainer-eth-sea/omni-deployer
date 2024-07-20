@@ -1,4 +1,5 @@
 import { IClientAdapter } from '../client-adapter';
+import { ISdk } from '../types';
 
 export enum CoinChain {
   ARBITRUM = 'arbitrum',
@@ -15,5 +16,10 @@ export enum BridgeProvider {
 export type SdkConstructorParams = {
   clientMap: ClientMap;
 };
+
+export type SdkSubModuleConstructorParams = {
+  sdk: ISdk;
+};
+
 
 export type ClientMap = Partial<Record<CoinChain, IClientAdapter>>;

@@ -6,13 +6,14 @@ import {
   DeployCoinMultiChainParams,
   ICoinManager,
 } from './types';
-import { SdkConstructorParams, ClientMap } from '../common';
+import { SdkSubModuleConstructorParams } from '../common';
+import { ISdk } from '../types';
 
 export class CoinManager implements ICoinManager {
-  private clientMap: ClientMap;
+  private sdk: ISdk;
 
-  constructor(params: SdkConstructorParams) {
-    this.clientMap = params.clientMap;
+  constructor(params: SdkSubModuleConstructorParams) {
+    this.sdk = params.sdk;
   }
 
   public async deployCoinSingleChain(
