@@ -1,8 +1,9 @@
 {
-  "MyCoin": {
-    "name": "Gud Coin",
-    "symbol": "GUD",
+  "OmniCoin": {
+    "name": "Omni Test",
+    "symbol": "TEST",
     "decimals": "18",
-    "totalSupply": "1000000000000000000000000000"
+    "totalSupply": "1000000000000000000000000000",
+    "receiver": "0x976922801d71035C17967F2FEE7E137503aea6C0"
   }
 }
