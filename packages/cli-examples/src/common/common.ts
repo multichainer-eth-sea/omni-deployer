@@ -8,7 +8,13 @@ import {
 } from '@omni-deployer/sdk';
 import { ethers } from 'ethers';
 import { config } from '../config';
-import { Account, Aptos, AptosConfig, Ed25519PrivateKey, Network } from '@aptos-labs/ts-sdk';
+import {
+  Account,
+  Aptos,
+  AptosConfig,
+  Ed25519PrivateKey,
+  Network,
+} from '@aptos-labs/ts-sdk';
 import web3 from '@solana/web3.js';
 import bs58 from 'bs58';
 

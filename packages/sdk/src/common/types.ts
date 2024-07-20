@@ -21,5 +21,4 @@ export type SdkSubModuleConstructorParams = {
   sdk: ISdk;
 };
 
-
 export type ClientMap = Partial<Record<CoinChain, IClientAdapter>>;
