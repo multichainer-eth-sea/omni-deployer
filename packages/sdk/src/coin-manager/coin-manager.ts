@@ -4,15 +4,17 @@ import {
   DeployCoinReturns,
   DeployCoinSingleChainParams,
   DeployCoinMultiChainParams,
+  DeployCoinReturnsReport,
   ICoinManager,
 } from './types';
-import { SdkConstructorParams, ClientMap } from '../common';
+import { SdkSubModuleConstructorParams, CoinChain } from '../common';
+import { ISdk } from '../types';
 
 export class CoinManager implements ICoinManager {
-  private clientMap: ClientMap;
+  private sdk: ISdk;
 
-  constructor(params: SdkConstructorParams) {
-    this.clientMap = params.clientMap;
+  constructor(params: SdkSubModuleConstructorParams) {
+    this.sdk = params.sdk;
   }
 
   public async deployCoinSingleChain(
@@ -37,23 +39,33 @@ export class CoinManager implements ICoinManager {
   public async deployCoinMultiChain(
     params: DeployCoinMultiChainParams,
   ): Promise<DeployCoinReturns> {
+    const deployResultsPromises = params.chains.map(async (chainData) => {
+      const client = this.sdk.getClient(chainData.chain);
+      const deployResult = await client.deployCoin({
+        chain: chainData.chain,
+        coinName: params.coinName,
+        coinTicker: params.coinTicker,
+        coinTotalSupply: chainData.amount,
+        coinDecimals: params.coinDecimals,
+        receiptAddress: chainData.receiptAddress,
+      });
+      return deployResult;
+    });
+    const deployResults = await Promise.all(deployResultsPromises);
+
+    const txHashes: Partial<Record<CoinChain, DeployCoinReturnsReport>> = {};
+
+    deployResults.forEach((deployResult) => {
+      const chain = deployResult.chain;
+      txHashes[chain] = deployResult;
+    });
+
     return {
       coinName: params.coinName,
       coinTicker: params.coinTicker,
       coinTotalSupply: params.coinTotalSupply,
       coinDecimals: params.coinDecimals,
-      txHashes: params.chains.reduce(
-        (acc, chain) => ({
-          ...acc,
-          [chain.chain]: {
-            chain: chain.chain,
-            amount: chain.amount,
-            receiptAddress: chain.receiptAddress,
-            txHash: '0x1234567890',
-          },
-        }),
-        {},
-      ),
+      txHashes,
     };
   }
 
@@ -63,6 +75,7 @@ export class CoinManager implements ICoinManager {
     return {
       fromChain: params.fromChain,
       toChain: params.toChain,
+      coinAddress: params.coinAddress,
       amount: params.amount,
       receiptAddress: params.receiptAddress,
       bridgeProvider: params.bridgeProvider,

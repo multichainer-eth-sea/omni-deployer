@@ -8,7 +8,13 @@ import {
 } from '@omni-deployer/sdk';
 import { ethers } from 'ethers';
 import { config } from '../config';
-import { Account, Ed25519PrivateKey } from '@aptos-labs/ts-sdk';
+import {
+  Account,
+  Aptos,
+  AptosConfig,
+  Ed25519PrivateKey,
+  Network,
+} from '@aptos-labs/ts-sdk';
 import web3 from '@solana/web3.js';
 import bs58 from 'bs58';
 
@@ -61,8 +67,10 @@ export function prepareAptosClient(
   const aptosAccount = Account.fromPrivateKey({
     privateKey: new Ed25519PrivateKey(privateKey),
   });
+  const aptosClient = new Aptos(new AptosConfig({ network: Network.MAINNET }));
 
   return new AptClientAdapter({
+    aptosClient,
     aptosAccount,
     networkMetadata: {
       gasTicker: 'APT',

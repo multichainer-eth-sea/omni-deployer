@@ -1,4 +1,4 @@
-import { runGetGasBalance } from './scripts/get-gas-balances';
+import { runGetGasBalance, runDeployTokenMultiChain } from './scripts';
 import { Command } from 'commander';
 
 const program = new Command();
@@ -11,5 +11,10 @@ program
   .command('get-gas-balances')
   .description('Get the gas balances of all accounts')
   .action(runGetGasBalance);
+
+program
+  .command('deploy-omni-coin')
+  .description('Deploy the OmniCoin contract')
+  .action(runDeployTokenMultiChain);
 
 program.parse();

@@ -13,6 +13,7 @@ export interface ICoinManager {
 export type BridgeCoinParams = {
   fromChain: CoinChain;
   toChain: CoinChain;
+  coinAddress: string;
   amount: number;
   receiptAddress: string;
   bridgeProvider: BridgeProvider;
@@ -21,8 +22,8 @@ export type BridgeCoinParams = {
 export type DeployCoinParams = {
   coinName: string;
   coinTicker: string;
-  coinTotalSupply: number;
-  coinDecimals: number;
+  coinTotalSupply: string;
+  coinDecimals: string;
 };
 
 export type DeployCoinSingleChainParams = DeployCoinParams & {
@@ -30,14 +31,14 @@ export type DeployCoinSingleChainParams = DeployCoinParams & {
   receiptAddress: string;
 };
 
-export type DeployCoinChainConfig = {
-  chain: CoinChain;
-  amount: number;
-  receiptAddress: string;
-};
-
 export type DeployCoinMultiChainParams = DeployCoinParams & {
   chains: DeployCoinChainConfig[];
+};
+
+export type DeployCoinChainConfig = {
+  chain: CoinChain;
+  amount: string;
+  receiptAddress: string;
 };
 
 export type DeployCoinReturnsReport = DeployCoinChainConfig & {

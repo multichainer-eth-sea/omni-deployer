@@ -3,6 +3,7 @@
 ## How to deploy a coin
 
 modify the coin metadata on this `./ignition/parameters.json`
+
 ```json
 {
   "MyCoin": {
@@ -15,6 +16,7 @@ modify the coin metadata on this `./ignition/parameters.json`
 ```
 
 then run this
+
 ```sh
 pnpm build
 pnpm deploy:coin --network arbitrum --verify
