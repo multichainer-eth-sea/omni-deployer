@@ -1,13 +1,13 @@
-# Sample Hardhat Project
+# Contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+How to deploy a coin
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
+```sh
+pnpm build
+pnpm deploy:coin \
+--name "Gud Coin" \
+--symbol "Gud" \
+--decimals 8 \
+--totalsupply 42000000000 \
+--network arbitrum
 ```

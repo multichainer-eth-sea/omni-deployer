@@ -3,7 +3,7 @@
   "scripts": {
     "build": "hardhat compile",
     "deploy:lock": "npx hardhat ignition deploy ./ignition/modules/Lock.ts",
-    "deploy:coin": "npx hardhat ignition deploy ./ignition/modules/MyCoin.ts",
+    "deploy:coin": "npx hardhat ignition deploy ./ignition/modules/MyCoin.ts --parameters ignition/parameters.json",
     "format": "prettier --write ."
   },
   "devDependencies": {
