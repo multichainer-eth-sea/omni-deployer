@@ -63,6 +63,7 @@ export class CoinManager implements ICoinManager {
     return {
       fromChain: params.fromChain,
       toChain: params.toChain,
+      coinAddress: params.coinAddress,
       amount: params.amount,
       receiptAddress: params.receiptAddress,
       bridgeProvider: params.bridgeProvider,

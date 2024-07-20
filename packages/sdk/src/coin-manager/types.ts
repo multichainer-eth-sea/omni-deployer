@@ -13,6 +13,7 @@ export interface ICoinManager {
 export type BridgeCoinParams = {
   fromChain: CoinChain;
   toChain: CoinChain;
+  coinAddress: string;
   amount: number;
   receiptAddress: string;
   bridgeProvider: BridgeProvider;
