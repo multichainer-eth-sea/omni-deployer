@@ -5,6 +5,7 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { AppWrapper } from "@/components/app-wrapper";
+import { Toaster } from "@/components/ui/toaster";
 
 const fontSans = FontSans({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         <ClientProvider>
           <AppWrapper>{children}</AppWrapper>
         </ClientProvider>
+        <Toaster />
       </body>
     </html>
   );
