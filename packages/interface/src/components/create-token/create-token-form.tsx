@@ -13,9 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { NumericalInput } from "@/components/ui/numerical-input";
 import { toast } from "@/components/ui/use-toast";
+import { denormalize, valueToBigInt } from "@/lib/common/bignumber";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { encodeFunctionData, parseAbi } from "viem";
+import { useSendTransaction } from "wagmi";
 import { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Terminal } from "lucide-react";
 const FormSchema = z.object({
   tokenName: z.string(),
   tokenSymbol: z.string(),
@@ -23,17 +29,51 @@ const FormSchema = z.object({
   totalSupply: z.string(),
 });
 
+const factoryAddress = "0x3C790C7f9Ffa4c3290ED05Df5CfF39748b77dBf7";
+const factoryInterface = [
+  "function createOmniCoin( string _coinName, string _coinTicker, uint8 _coinDecimals, uint256 _coinTotalSupply) public",
+] as const;
+const factoryAbi = parseAbi(factoryInterface);
+
 export function CreateTokenForm() {
+  const { data: hash, isPending, sendTransaction } = useSendTransaction();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      tokenName: "Omnidog",
+      tokenSymbol: "OMNID",
+      decimal: "18",
+      totalSupply: "1000000",
+    },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit(formData: z.infer<typeof FormSchema>) {
+    const decimal = Number(formData.decimal);
+    const totalSupplyBN = denormalize(formData.totalSupply, decimal);
+    const data = encodeFunctionData({
+      abi: factoryAbi,
+      functionName: "createOmniCoin",
+      args: [
+        formData.tokenName,
+        formData.tokenSymbol,
+        decimal,
+        valueToBigInt(totalSupplyBN),
+      ],
+    });
+
+    sendTransaction({
+      to: factoryAddress,
+      data,
+    });
+
     toast({
       title: "You submitted the following values:",
       description: (
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+          <code className="text-white">
+            {JSON.stringify(formData, null, 2)}
+          </code>
         </pre>
       ),
     });
@@ -107,9 +147,26 @@ export function CreateTokenForm() {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          Submit
-        </Button>
+        {hash ? (
+          <Alert>
+            <Terminal className="h-4 w-4" />
+            <AlertTitle>Success</AlertTitle>
+            <AlertDescription>
+              View your transaction{" "}
+              <a
+                className="underline"
+                target="_blank"
+                href={`https://arbiscan.io/tx/${hash}`}
+              >
+                here
+              </a>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Button loading={isPending} className="w-full" type="submit">
+            {isPending ? "Creating Token..." : "Create Token"}
+          </Button>
+        )}
       </form>
     </Form>
   );
