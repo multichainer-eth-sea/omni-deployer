@@ -49,7 +49,6 @@ export function CreateTokenForm() {
   });
 
   function onSubmit(formData: z.infer<typeof FormSchema>) {
-    console.log("onsubmit call");
     const decimal = Number(formData.decimal);
     const totalSupplyBN = denormalize(formData.totalSupply, decimal);
     const data = encodeFunctionData({
