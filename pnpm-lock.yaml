@@ -65,13 +65,31 @@ importers:
         version: 2.0.3(@types/node@20.14.11)(terser@5.31.3)
 
   packages/evm-contracts:
+    specifiers:
+      '@nomicfoundation/hardhat-chai-matchers': ^2.0.0
+      '@nomicfoundation/hardhat-ethers': ^3.0.0
+      '@nomicfoundation/hardhat-ignition': ^0.15.5
+      '@nomicfoundation/hardhat-ignition-ethers': ^0.15.0
+      '@nomicfoundation/hardhat-network-helpers': ^1.0.0
+      '@nomicfoundation/hardhat-toolbox': ^5.0.0
+      '@nomicfoundation/hardhat-verify': ^2.0.8
+      '@openzeppelin/contracts': ^5.0.2
+      '@typechain/ethers-v6': ^0.5.0
+      '@typechain/hardhat': ^9.0.0
+      '@types/chai': ^4.2.0
+      '@types/mocha': '>=9.1.0'
+      chai: ^4.2.0
+      dotenv: ^16.4.5
+      ethers: ^6.4.0
+      hardhat: ^2.22.6
+      hardhat-gas-reporter: ^1.0.8
+      solidity-coverage: ^0.8.1
+      typechain: ^8.3.0
+      unique-names-generator: ^4.7.1
     dependencies:
-      '@openzeppelin/contracts':
-        specifier: ^5.0.2
-        version: 5.0.2
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
+      '@openzeppelin/contracts': 5.0.2
+      dotenv: 16.4.5
+      unique-names-generator: 4.7.1
     devDependencies:
       '@nomicfoundation/hardhat-chai-matchers':
         specifier: ^2.0.0
@@ -6686,7 +6704,12 @@ packages:
     resolution: {integrity: sha512-6t3foTQI9qne+OZoVQB/8x8rk2k1eVy1gRXhV3oFQ5T6R1dqQ1xtin3XqSlx3+ATBkliTaR/hHyJBm+LVPNM8w==}
     engines: {node: '>=4'}
 
-  universalify@0.1.2:
+  /unique-names-generator/4.7.1:
+    resolution: {integrity: sha512-lMx9dX+KRmG8sq6gulYYpKWZc9RlGsgBR6aoO8Qsm3qvkSJ+3rAymr+TnV8EDMrIrwuFJ4kruzMWM/OpYzPoow==}
+    engines: {node: '>=8'}
+    dev: false
+
+  /universalify/0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
 
