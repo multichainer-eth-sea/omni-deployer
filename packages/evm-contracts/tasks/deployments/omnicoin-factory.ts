@@ -5,7 +5,8 @@ const deployTask = scope('deploy');
 deployTask
   .task('omnicoin-factory', 'Deploys the OmniCoin Factory contract')
   .setAction(async (_, hre) => {
-    const OmniCoinFactory = await hre.ethers.getContractFactory('OmniCoinFactory');
+    const OmniCoinFactory =
+      await hre.ethers.getContractFactory('OmniCoinFactory');
     const omniCoinFactory = await OmniCoinFactory.deploy();
     await omniCoinFactory.waitForDeployment();
     const deployedAddress = await omniCoinFactory.getAddress();
