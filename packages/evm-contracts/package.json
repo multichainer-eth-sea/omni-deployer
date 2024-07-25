@@ -2,9 +2,9 @@
   "name": "@omni-deployer/evm-contracts",
   "scripts": {
     "build": "hardhat compile",
-    "deploy:lock": "npx hardhat ignition deploy ./ignition/modules/Lock.ts",
-    "deploy:coin": "npx hardhat ignition deploy ./ignition/modules/OmniCoin.ts --parameters ignition/parameters.json",
-    "deploy:factory": "npx hardhat ignition deploy ./ignition/modules/OmniCoinFactory.ts",
+    "deploy:coin": "npx hardhat deploy omnicoin",
+    "deploy:factory": "npx hardhat deploy omnicoin-factory",
+    "deploy:lz-v1": "npx hardhat deploy lz-v1",
     "format": "prettier --write ."
   },
   "devDependencies": {
@@ -14,7 +14,7 @@
     "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.8",
     "@typechain/ethers-v6": "^0.5.0",
     "@typechain/hardhat": "^9.0.0",
     "@types/chai": "^4.2.0",
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "unique-names-generator": "^4.7.1"
   }
 }
