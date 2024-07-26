@@ -15,13 +15,13 @@ import { NumericalInput } from "@/components/ui/numerical-input";
 import { toast } from "@/components/ui/use-toast";
 import { denormalize, valueToBigInt } from "@/lib/common/bignumber";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { Terminal } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { encodeFunctionData, parseAbi } from "viem";
 import { useSendTransaction } from "wagmi";
 import { z } from "zod";
+import { CheckerConnect } from "../checker-connect";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import { Terminal } from "lucide-react";
 const FormSchema = z.object({
   tokenName: z.string(),
   tokenSymbol: z.string(),
@@ -163,9 +163,11 @@ export function CreateTokenForm() {
             </AlertDescription>
           </Alert>
         ) : (
-          <Button loading={isPending} className="w-full" type="submit">
-            {isPending ? "Creating Token..." : "Create Token"}
-          </Button>
+          <CheckerConnect className="w-full">
+            <Button loading={isPending} className="w-full" type="submit">
+              {isPending ? "Creating Token..." : "Create Token"}
+            </Button>
+          </CheckerConnect>
         )}
       </form>
     </Form>

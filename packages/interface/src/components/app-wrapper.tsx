@@ -1,12 +1,11 @@
+"use client";
+
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { usePathname, useSearchParams } from "next/navigation";
 
 const links = [
   {
-    href: "/docs",
-    label: "Docs",
-  },
-  {
-    href: "/create",
+    href: "/",
     label: "Create",
   },
   {
@@ -16,19 +15,21 @@ const links = [
 ];
 
 export function AppWrapper({ children }: React.PropsWithChildren) {
+  const pathname = usePathname();
+
   return (
     <div className="relative flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 w-full border-border/40 bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
           <div className="flex items-center">
             <a className="mr-6 text-sm font-bold" href="/">
-              Logo
+              Omni-Deployer
             </a>
             <nav className="flex gap-4 text-sm">
               {links.map(({ href, label }) => (
                 <a
                   key={href}
-                  className="text-foreground/60 transition-colors hover:text-foreground/80"
+                  className={`${pathname == href ? "text-foreground/80" : "text-foreground/60"} transition-colors hover:text-foreground/80`}
                   href={href}
                 >
                   {label}
