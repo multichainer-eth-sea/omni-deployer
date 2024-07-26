@@ -2,9 +2,11 @@
   "name": "@omni-deployer/evm-contracts",
   "scripts": {
     "build": "hardhat compile",
-    "deploy:coin": "npx hardhat deploy omnicoin",
-    "deploy:factory": "npx hardhat deploy omnicoin-factory",
-    "deploy:lz-v1": "npx hardhat deploy lz-v1",
+    "test": "hardhat test",
+    "deploy:coin": "hardhat deploy omnicoin",
+    "deploy:factory": "hardhat deploy omnicoin-factory",
+    "deploy:lz-v1": "hardhat deploy lz-v1",
+    "deploy:byte-playground": "hardhat deploy byte-playground",
     "format": "prettier --write ."
   },
   "devDependencies": {
