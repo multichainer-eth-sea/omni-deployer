@@ -85,7 +85,7 @@ describe('OmniFactoryV3', () => {
     });
   });
   describe('deployRemoteCoin()', () => {
-    it('should deploy coin on remote chain', async () => {
+    it('should deploy coin on single remote chain', async () => {
       // ---------- arrange ---------- //
       // prepare the chain id
       const [CHAIN_A, CHAIN_B] = [69, 420];
@@ -152,7 +152,10 @@ describe('OmniFactoryV3', () => {
         coinDetails.totalSupply,
         owner.address,
         CHAIN_B,
+        factoryContractAddressB,
       );
+
+      console.log(nativeFee.toString());
 
       // run deployLocalCoin()
       await (
@@ -191,5 +194,6 @@ describe('OmniFactoryV3', () => {
         coinDetails.totalSupply,
       );
     });
+    it('should deploy coin on multiple remote chains', async () => {});
   });
 });
