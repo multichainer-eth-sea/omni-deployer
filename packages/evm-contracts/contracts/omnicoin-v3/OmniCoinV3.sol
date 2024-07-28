@@ -4,12 +4,11 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract OmniCoinV3 is ERC20 {
-
     uint8 private coinDecimals;
 
     constructor(
-        string memory _coinName, 
-        string memory _coinTicker, 
+        string memory _coinName,
+        string memory _coinTicker,
         uint8 _coinDecimals,
         uint256 _coinTotalSupply,
         address _receiver
@@ -22,4 +21,3 @@ contract OmniCoinV3 is ERC20 {
         return coinDecimals;
     }
 }
-

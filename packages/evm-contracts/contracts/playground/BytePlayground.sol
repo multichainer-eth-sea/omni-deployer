@@ -34,15 +34,17 @@ contract BytePlayground {
         return abi.encode(complexStruct);
     }
 
-    function convertBytesToComplexStruct(bytes memory _bytes)
+    function convertBytesToComplexStruct(
+        bytes memory _bytes
+    ) public pure returns (MyComplexStruct memory) {
+        return abi.decode(_bytes, (MyComplexStruct));
+    }
+
+    function getComplextStructCycledFromBytes()
         public
         pure
         returns (MyComplexStruct memory)
     {
-        return abi.decode(_bytes, (MyComplexStruct));
-    }
-
-    function getComplextStructCycledFromBytes() public pure returns (MyComplexStruct memory) {
         bytes memory complexStructBytes = convertComplexStructToBytes();
         return convertBytesToComplexStruct(complexStructBytes);
     }

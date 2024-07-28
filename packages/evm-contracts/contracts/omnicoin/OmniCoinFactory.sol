@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import { OmniCoin } from "./OmniCoin.sol";
+import {OmniCoin} from "./OmniCoin.sol";
 
 contract OmniCoinFactory {
     event OmniCoinCreated(address indexed coinAddress, address indexed creator);

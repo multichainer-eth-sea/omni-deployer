@@ -25,10 +25,10 @@ interface ILayerZeroEndpoint {
     // @param _payInZRO - if false, user app pays the protocol fee in native token
     // @param _adapterParam - parameters for the adapter service, e.g. send some dust native token to dstChain
     function estimateFees(
-        uint16 _dstChainId, 
-        address _userApplication, 
-        bytes calldata _payload, 
-        bool _payInZRO, 
+        uint16 _dstChainId,
+        address _userApplication,
+        bytes calldata _payload,
+        bool _payInZRO,
         bytes calldata _adapterParam
     ) external view returns (uint nativeFee, uint zroFee);
 
@@ -44,13 +44,13 @@ interface ILayerZeroReceiver {
     // @param _payload - the signed payload is the UA bytes has encoded to be sent
     function lzReceive(
         uint16 _srcChainId,
-        bytes calldata _srcAddress, 
-        uint64 _nonce, 
+        bytes calldata _srcAddress,
+        uint64 _nonce,
         bytes calldata _payload
     ) external;
 }
 
-contract MyLayerZeroV1 is ILayerZeroReceiver  {
+contract MyLayerZeroV1 is ILayerZeroReceiver {
     ILayerZeroEndpoint public _lzEndpoint;
 
     event EndpointSendParams(
@@ -74,15 +74,15 @@ contract MyLayerZeroV1 is ILayerZeroReceiver  {
 
     constructor(address lzEndpointAddress) {
         _lzEndpoint = ILayerZeroEndpoint(lzEndpointAddress);
-    } 
+    }
 
     function saySomethingOmnichain(
-        string memory message, 
-        uint16 _dstChainId, 
+        string memory message,
+        uint16 _dstChainId,
         address remoteAddress
     ) public payable {
         bytes memory remoteAndLocalAddresses = abi.encodePacked(
-            remoteAddress, 
+            remoteAddress,
             address(this)
         );
         _lzEndpoint.send{value: msg.value}(
@@ -105,7 +105,7 @@ contract MyLayerZeroV1 is ILayerZeroReceiver  {
     }
 
     function estimateFeeSaySomethingOmnichain(
-        string memory message, 
+        string memory message,
         uint16 _dstChainId
     ) public view returns (uint256 nativeFee, uint256 zroFee) {
         (nativeFee, zroFee) = _lzEndpoint.estimateFees(
@@ -120,10 +120,10 @@ contract MyLayerZeroV1 is ILayerZeroReceiver  {
     // override from ILayerZeroReceiver.sol
     function lzReceive(
         uint16 _srcChainId, // source chain id
-        bytes memory _srcAddress,  // source sending contract address
+        bytes memory _srcAddress, // source sending contract address
         uint64 _nonce, // the ordered message nonce
         bytes memory _payload // the signed payload is the UA bytes has encoded to be sent
-    ) override external {
+    ) external override {
         // require(keccak256(_srcAddress) == keccak256(trustedRemoteLookup[_srcChainId]);
         address fromAddress;
         assembly {
@@ -131,11 +131,6 @@ contract MyLayerZeroV1 is ILayerZeroReceiver  {
         }
         lastMessage = string(_payload);
 
-        emit EndpointReceiveParams(
-            _srcChainId,
-            _srcAddress,
-            _nonce,
-            _payload
-        );
+        emit EndpointReceiveParams(_srcChainId, _srcAddress, _nonce, _payload);
     }
 }

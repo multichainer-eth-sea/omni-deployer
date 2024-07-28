@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import { OmniCoinV2 } from "./OmniCoinV2.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { ILayerZeroEndpoint } from '@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEndpoint.sol';
-import { ILayerZeroReceiver } from '@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol';
+import {OmniCoinV2} from "./OmniCoinV2.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ILayerZeroEndpoint} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEndpoint.sol";
+import {ILayerZeroReceiver} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol";
 
 contract OmniCoinFactoryV2 {
     ILayerZeroEndpoint public _lzEndpoint;
 
-    event LocalCoinDeployed(address indexed coinAddress, address indexed creator);
-    event RemoteCoinDeployed(address indexed remoteFactoryAddress, address indexed creator, uint16 indexed chainId);
+    event LocalCoinDeployed(
+        address indexed coinAddress,
+        address indexed creator
+    );
+    event RemoteCoinDeployed(
+        address indexed remoteFactoryAddress,
+        address indexed creator,
+        uint16 indexed chainId
+    );
 
     constructor(address payable lzEndpointAddress) {
         _lzEndpoint = ILayerZeroEndpoint(lzEndpointAddress);
@@ -38,11 +45,11 @@ contract OmniCoinFactoryV2 {
     }
 
     function deployRemoteCoin(
-       string memory coinName,
-       string memory coinTicker,
-       uint8 coinDecimals,
-       uint256 coinTotalSupply,
-       uint16 remoteChainId
+        string memory coinName,
+        string memory coinTicker,
+        uint8 coinDecimals,
+        uint256 coinTotalSupply,
+        uint16 remoteChainId
     ) external {
         // TODO:    Implement the remote coin deployment
         //          Implement the lzReceive function
@@ -57,6 +64,10 @@ contract OmniCoinFactoryV2 {
         //         bytes("")
         //     );
 
-        emit RemoteCoinDeployed(remoteFactoryAddress, msg.sender, remoteChainId);
+        emit RemoteCoinDeployed(
+            remoteFactoryAddress,
+            msg.sender,
+            remoteChainId
+        );
     }
 }

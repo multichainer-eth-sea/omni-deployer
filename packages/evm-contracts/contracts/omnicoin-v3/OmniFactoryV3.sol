@@ -1,17 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
-import { ILayerZeroEndpoint } from '@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEndpoint.sol';
-import { ILayerZeroReceiver } from '@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol';
-import { NonblockingLzApp } from '@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol';
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { OmniCoinV3 } from "./OmniCoinV3.sol";
+import {ILayerZeroEndpoint} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEndpoint.sol";
+import {ILayerZeroReceiver} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol";
+import {NonblockingLzApp} from "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OmniCoinV3} from "./OmniCoinV3.sol";
 // import "hardhat/console.sol";
 
 contract OmniFactoryV3 is NonblockingLzApp {
-    event LocalCoinDeployed(address indexed coinAddress, address indexed coinReceiver);
-    event RemoteCoinDeployed(address indexed remoteFactoryAddress, address indexed creator, uint16 indexed chainId);
+    event LocalCoinDeployed(
+        address indexed coinAddress,
+        address indexed coinReceiver
+    );
+    event RemoteCoinDeployed(
+        address indexed remoteFactoryAddress,
+        address indexed creator,
+        uint16 indexed chainId
+    );
 
-    constructor(address _endpoint) NonblockingLzApp(_endpoint) Ownable(msg.sender)  {}
+    constructor(
+        address _endpoint
+    ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
 
     function _nonblockingLzReceive(
         uint16,
@@ -27,7 +36,13 @@ contract OmniFactoryV3 is NonblockingLzApp {
             address receiver
         ) = abi.decode(_payload, (string, string, uint8, uint256, address));
 
-        _deployLocalCoin(coinName, coinTicker, coinDecimals, coinTotalSupply, receiver);
+        _deployLocalCoin(
+            coinName,
+            coinTicker,
+            coinDecimals,
+            coinTotalSupply,
+            receiver
+        );
     }
 
     function deployLocalCoin(
@@ -36,7 +51,13 @@ contract OmniFactoryV3 is NonblockingLzApp {
         uint8 coinDecimals,
         uint256 coinTotalSupply
     ) public {
-        _deployLocalCoin(coinName, coinTicker, coinDecimals, coinTotalSupply, msg.sender);
+        _deployLocalCoin(
+            coinName,
+            coinTicker,
+            coinDecimals,
+            coinTotalSupply,
+            msg.sender
+        );
     }
 
     function _deployLocalCoin(
@@ -66,16 +87,26 @@ contract OmniFactoryV3 is NonblockingLzApp {
     ) public view returns (uint nativeFee, uint zroFee) {
         uint16 version = 1;
         uint256 gasForDestinationLzReceive = 3500000;
-        bytes memory adapterParams = abi.encodePacked(version, gasForDestinationLzReceive);
+        bytes memory adapterParams = abi.encodePacked(
+            version,
+            gasForDestinationLzReceive
+        );
 
         bytes memory payload = abi.encode(
-            coinName, 
-            coinTicker, 
-            coinDecimals, 
+            coinName,
+            coinTicker,
+            coinDecimals,
             coinTotalSupply,
             receiver
         );
-        return lzEndpoint.estimateFees(remoteChainId, address(this), payload, false, adapterParams);
+        return
+            lzEndpoint.estimateFees(
+                remoteChainId,
+                address(this),
+                payload,
+                false,
+                adapterParams
+            );
     }
 
     function deployRemoteCoin(
@@ -88,16 +119,19 @@ contract OmniFactoryV3 is NonblockingLzApp {
         address remoteChainAddress
     ) public payable {
         bytes memory payload = abi.encode(
-            coinName, 
-            coinTicker, 
-            coinDecimals, 
+            coinName,
+            coinTicker,
+            coinDecimals,
             coinTotalSupply,
             receiver
         );
 
         uint16 version = 1;
         uint256 gasForDestinationLzReceive = 3500000;
-        bytes memory adapterParams = abi.encodePacked(version, gasForDestinationLzReceive);
+        bytes memory adapterParams = abi.encodePacked(
+            version,
+            gasForDestinationLzReceive
+        );
 
         _lzSend(
             remoteChainId,
@@ -113,5 +147,4 @@ contract OmniFactoryV3 is NonblockingLzApp {
 
     // allow this contract to receive ether
     receive() external payable {}
-
 }
