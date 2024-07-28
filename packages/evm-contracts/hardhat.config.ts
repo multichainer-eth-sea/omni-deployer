@@ -6,7 +6,15 @@ import { config as envConfig } from './utils';
 import './tasks';
 
 const config: HardhatUserConfig = {
-  solidity: '0.8.24',
+  solidity: {
+    version: '0.8.24',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+      },
+    },
+  },
   networks: {
     arbitrumOne: {
       url: 'https://arbitrum.llamarpc.com',

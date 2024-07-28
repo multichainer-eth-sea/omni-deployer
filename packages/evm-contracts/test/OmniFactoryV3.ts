@@ -150,12 +150,15 @@ describe('OmniFactoryV3', () => {
         coinDetails.symbol,
         coinDetails.decimals,
         coinDetails.totalSupply,
-        owner.address,
-        CHAIN_B,
-        factoryContractAddressB,
+        [
+          {
+            _remoteChainId: CHAIN_B,
+            _receiver: owner.address,
+            _remoteSupplyAmount: coinDetails.totalSupply,
+            _remoteFactoryAddress: factoryContractAddressB,
+          },
+        ],
       );
-
-      console.log(nativeFee.toString());
 
       // run deployLocalCoin()
       await (
@@ -164,9 +167,14 @@ describe('OmniFactoryV3', () => {
           coinDetails.symbol,
           coinDetails.decimals,
           coinDetails.totalSupply,
-          owner.address,
-          CHAIN_B,
-          factoryContractAddressB,
+          [
+            {
+              _remoteChainId: CHAIN_B,
+              _receiver: owner.address,
+              _remoteSupplyAmount: coinDetails.totalSupply,
+              _remoteFactoryAddress: factoryContractAddressB,
+            },
+          ],
           { value: nativeFee },
         )
       ).wait();

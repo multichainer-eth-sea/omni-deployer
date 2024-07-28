@@ -122,9 +122,7 @@ contract OmniFactoryV3 is NonblockingLzApp {
     string memory _coinTicker,
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
-    address _receiver,
-    uint16 _remoteChainId,
-    address _remoteChainAddress
+    DeployRemoteCoinChainConfig[] memory _remoteConfigs
   ) public view returns (uint nativeFee, uint zroFee) {
     uint16 version = 1;
     bytes memory adapterParams = abi.encodePacked(
@@ -138,10 +136,10 @@ contract OmniFactoryV3 is NonblockingLzApp {
       _coinDecimals: _coinDecimals,
       _coinTotalSupply: _coinTotalSupply,
       _remoteConfigs: DeployRemoteCoinChainConfig({
-        _remoteChainId: _remoteChainId,
-        _receiver: _receiver,
-        _remoteSupplyAmount: _coinTotalSupply,
-        _remoteFactoryAddress: _remoteChainAddress
+        _remoteChainId: _remoteConfigs[0]._remoteChainId,
+        _receiver: _remoteConfigs[0]._receiver,
+        _remoteSupplyAmount: _remoteConfigs[0]._remoteSupplyAmount,
+        _remoteFactoryAddress: _remoteConfigs[0]._remoteFactoryAddress
       })
     });
     bytes memory deployBytes = abi.encode(deployData);
@@ -154,7 +152,7 @@ contract OmniFactoryV3 is NonblockingLzApp {
 
     return
       lzEndpoint.estimateFees(
-        _remoteChainId,
+        _remoteConfigs[0]._remoteChainId,
         address(this),
         payload,
         false,
@@ -167,9 +165,7 @@ contract OmniFactoryV3 is NonblockingLzApp {
     string memory _coinTicker,
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
-    address _receiver,
-    uint16 _remoteChainId,
-    address _remoteChainAddress
+    DeployRemoteCoinChainConfig[] memory _remoteConfigs
   ) public payable {
     uint16 version = 1;
     bytes memory adapterParams = abi.encodePacked(
@@ -182,12 +178,7 @@ contract OmniFactoryV3 is NonblockingLzApp {
       _coinTicker: _coinTicker,
       _coinDecimals: _coinDecimals,
       _coinTotalSupply: _coinTotalSupply,
-      _remoteConfigs: DeployRemoteCoinChainConfig({
-        _remoteChainId: _remoteChainId,
-        _receiver: _receiver,
-        _remoteSupplyAmount: _coinTotalSupply,
-        _remoteFactoryAddress: _remoteChainAddress
-      })
+      _remoteConfigs: _remoteConfigs[0]
     });
     bytes memory deployBytes = abi.encode(deployData);
 
@@ -198,7 +189,7 @@ contract OmniFactoryV3 is NonblockingLzApp {
     bytes memory payload = abi.encode(cmd);
 
     _lzSend(
-      _remoteChainId,
+      _remoteConfigs[0]._remoteChainId,
       payload,
       payable(msg.sender),
       address(0x0),
@@ -206,7 +197,11 @@ contract OmniFactoryV3 is NonblockingLzApp {
       address(this).balance
     );
 
-    emit RemoteCoinDeployed(_remoteChainAddress, msg.sender, _remoteChainId);
+    emit RemoteCoinDeployed(
+      _remoteConfigs[0]._remoteFactoryAddress,
+      msg.sender,
+      _remoteConfigs[0]._remoteChainId
+    );
   }
 
   // allow this contract to receive ether
