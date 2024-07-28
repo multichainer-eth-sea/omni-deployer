@@ -7,6 +7,31 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {OmniCoinV3} from "./OmniCoinV3.sol";
 // import "hardhat/console.sol";
 
+enum CrossChainCommandId {
+    DeployRemoteCoin,
+    GossipRemoteCoin
+}
+
+struct CrossChainCommand {
+    CrossChainCommandId _commandId;
+    bytes _commandData;
+}
+
+struct DeployRemoteCoin {
+    string _coinName;
+    string _coinTicker;
+    uint8 _coinDecimals;
+    uint256 _coinTotalSupply;
+    DeployRemoteCoinChainConfig _remoteConfigs;
+}
+
+struct DeployRemoteCoinChainConfig {
+    uint16 _remoteChainId;
+    address _receiver;
+    uint256 _remoteSupplyAmount;
+    address _remoteFactoryAddress;
+}
+
 contract OmniFactoryV3 is NonblockingLzApp {
     event LocalCoinDeployed(
         address indexed coinAddress,
@@ -22,86 +47,114 @@ contract OmniFactoryV3 is NonblockingLzApp {
         address _endpoint
     ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
 
+    uint256 internal constant gasForDestinationLzReceive = 3500000;
+
     function _nonblockingLzReceive(
         uint16,
         bytes memory,
         uint64,
         bytes memory _payload
     ) internal override {
-        (
-            string memory coinName,
-            string memory coinTicker,
-            uint8 coinDecimals,
-            uint256 coinTotalSupply,
-            address receiver
-        ) = abi.decode(_payload, (string, string, uint8, uint256, address));
-
-        _deployLocalCoin(
-            coinName,
-            coinTicker,
-            coinDecimals,
-            coinTotalSupply,
-            receiver
+        CrossChainCommand memory cmd = abi.decode(
+            _payload,
+            (CrossChainCommand)
         );
+
+        if (cmd._commandId == CrossChainCommandId.DeployRemoteCoin) {
+            DeployRemoteCoin memory coinData = abi.decode(
+                cmd._commandData,
+                (DeployRemoteCoin)
+            );
+
+            _deployLocalCoin(
+                coinData._coinName,
+                coinData._coinTicker,
+                coinData._coinDecimals,
+                coinData._remoteConfigs._remoteSupplyAmount,
+                coinData._remoteConfigs._receiver
+            );
+
+            // _gossipNewCoin(newCoin);
+            return;
+        }
+
+    }
+
+    // TODO(dims): implement this after multiple chain deployed implemented
+    function _gossipNewCoin(OmniCoinV3 _newCoin) internal {
+        // ...
     }
 
     function deployLocalCoin(
-        string memory coinName,
-        string memory coinTicker,
-        uint8 coinDecimals,
-        uint256 coinTotalSupply
+        string memory _coinName,
+        string memory _coinTicker,
+        uint8 _coinDecimals,
+        uint256 _coinTotalSupply
     ) public {
         _deployLocalCoin(
-            coinName,
-            coinTicker,
-            coinDecimals,
-            coinTotalSupply,
+            _coinName,
+            _coinTicker,
+            _coinDecimals,
+            _coinTotalSupply,
             msg.sender
         );
     }
 
     function _deployLocalCoin(
-        string memory coinName,
-        string memory coinTicker,
-        uint8 coinDecimals,
-        uint256 coinTotalSupply,
-        address receiver
-    ) internal {
-        OmniCoinV3 newCoin = new OmniCoinV3(
-            coinName,
-            coinTicker,
-            coinDecimals,
-            coinTotalSupply,
-            receiver
+        string memory _coinName,
+        string memory _coinTicker,
+        uint8 _coinDecimals,
+        uint256 _coinTotalSupply,
+        address _receiver
+    ) internal returns (OmniCoinV3 newCoin) {
+        newCoin = new OmniCoinV3(
+            _coinName,
+            _coinTicker,
+            _coinDecimals,
+            _coinTotalSupply,
+            _receiver
         );
-        emit LocalCoinDeployed(address(newCoin), receiver);
+        emit LocalCoinDeployed(address(newCoin), _receiver);
     }
 
     function estimateFee(
-        string memory coinName,
-        string memory coinTicker,
-        uint8 coinDecimals,
-        uint256 coinTotalSupply,
-        address receiver,
-        uint16 remoteChainId
+        string memory _coinName,
+        string memory _coinTicker,
+        uint8 _coinDecimals,
+        uint256 _coinTotalSupply,
+        address _receiver,
+        uint16 _remoteChainId,
+        address _remoteChainAddress
     ) public view returns (uint nativeFee, uint zroFee) {
         uint16 version = 1;
-        uint256 gasForDestinationLzReceive = 3500000;
         bytes memory adapterParams = abi.encodePacked(
             version,
             gasForDestinationLzReceive
         );
 
-        bytes memory payload = abi.encode(
-            coinName,
-            coinTicker,
-            coinDecimals,
-            coinTotalSupply,
-            receiver
-        );
+        DeployRemoteCoin memory deployData = DeployRemoteCoin({
+            _coinName: _coinName,
+            _coinTicker: _coinTicker,
+            _coinDecimals: _coinDecimals,
+            _coinTotalSupply: _coinTotalSupply,
+            _remoteConfigs: DeployRemoteCoinChainConfig({
+                _remoteChainId: _remoteChainId,
+                _receiver: _receiver,
+                _remoteSupplyAmount: _coinTotalSupply,
+                _remoteFactoryAddress: _remoteChainAddress
+            })
+        });
+        bytes memory deployBytes = abi.encode(deployData);
+
+        CrossChainCommand memory cmd = CrossChainCommand({
+            _commandId: CrossChainCommandId.DeployRemoteCoin,
+            _commandData: deployBytes
+        });
+        bytes memory payload = abi.encode(cmd);
+
         return
             lzEndpoint.estimateFees(
-                remoteChainId,
+                _remoteChainId,
                 address(this),
                 payload,
                 false,
@@ -110,31 +163,42 @@ contract OmniFactoryV3 is NonblockingLzApp {
     }
 
     function deployRemoteCoin(
-        string memory coinName,
-        string memory coinTicker,
-        uint8 coinDecimals,
-        uint256 coinTotalSupply,
-        address receiver,
-        uint16 remoteChainId,
-        address remoteChainAddress
+        string memory _coinName,
+        string memory _coinTicker,
+        uint8 _coinDecimals,
+        uint256 _coinTotalSupply,
+        address _receiver,
+        uint16 _remoteChainId,
+        address _remoteChainAddress
     ) public payable {
-        bytes memory payload = abi.encode(
-            coinName,
-            coinTicker,
-            coinDecimals,
-            coinTotalSupply,
-            receiver
-        );
-
         uint16 version = 1;
-        uint256 gasForDestinationLzReceive = 3500000;
         bytes memory adapterParams = abi.encodePacked(
             version,
             gasForDestinationLzReceive
         );
 
+        DeployRemoteCoin memory deployData = DeployRemoteCoin({
+            _coinName: _coinName,
+            _coinTicker: _coinTicker,
+            _coinDecimals: _coinDecimals,
+            _coinTotalSupply: _coinTotalSupply,
+            _remoteConfigs: DeployRemoteCoinChainConfig({
+                _remoteChainId: _remoteChainId,
+                _receiver: _receiver,
+                _remoteSupplyAmount: _coinTotalSupply,
+                _remoteFactoryAddress: _remoteChainAddress
+            })
+        });
+        bytes memory deployBytes = abi.encode(deployData);
+
+        CrossChainCommand memory cmd = CrossChainCommand({
+            _commandId: CrossChainCommandId.DeployRemoteCoin,
+            _commandData: deployBytes
+        });
+        bytes memory payload = abi.encode(cmd);
+
         _lzSend(
-            remoteChainId,
+            _remoteChainId,
             payload,
             payable(msg.sender),
             address(0x0),
@@ -142,7 +206,11 @@ contract OmniFactoryV3 is NonblockingLzApp {
             address(this).balance
         );
 
-        emit RemoteCoinDeployed(remoteChainAddress, msg.sender, remoteChainId);
+        emit RemoteCoinDeployed(
+            _remoteChainAddress,
+            msg.sender,
+            _remoteChainId
+        );
     }
 
     // allow this contract to receive ether
