@@ -124,6 +124,9 @@ importers:
       hardhat-gas-reporter:
         specifier: ^1.0.8
         version: 1.0.10(bufferutil@4.0.8)(hardhat@2.22.6(bufferutil@4.0.8)(ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.3))(typescript@5.5.3)(utf-8-validate@5.0.10))(utf-8-validate@5.0.10)
+      prettier-plugin-solidity:
+        specifier: ^1.3.1
+        version: 1.3.1(prettier@3.3.3)
       solidity-coverage:
         specifier: ^0.8.1
         version: 0.8.12(hardhat@2.22.6(bufferutil@4.0.8)(ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.3))(typescript@5.5.3)(utf-8-validate@5.0.10))
@@ -2394,6 +2397,9 @@ packages:
 
   '@solidity-parser/parser@0.14.5':
     resolution: {integrity: sha512-6dKnHZn7fg/iQATVEzqyUOyEidbn05q7YA2mQ9hC0MMXhhV3/JrsxmFSYZAcr7j1yUP700LLhTruvJ3MiQmjJg==}
+
+  '@solidity-parser/parser@0.17.0':
+    resolution: {integrity: sha512-Nko8R0/kUo391jsEHHxrGM07QFdnPGvlmox4rmH0kNiNAashItAilhy4Mv4pK5gQmW5f4sXAF58fwJbmlkGcVw==}
 
   '@solidity-parser/parser@0.18.0':
     resolution: {integrity: sha512-yfORGUIPgLck41qyN7nbwJRAx17/jAIXCTanHOJZhB6PJ1iAk/84b/xlsVKFSyNyLXIj0dhppoE0+CRws7wlzA==}
@@ -5909,6 +5915,12 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
+  prettier-plugin-solidity@1.3.1:
+    resolution: {integrity: sha512-MN4OP5I2gHAzHZG1wcuJl0FsLS3c4Cc5494bbg+6oQWBPuEamjwDvmGfFMZ6NFzsh3Efd9UUxeT7ImgjNH4ozA==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      prettier: '>=2.3.0'
+
   prettier-plugin-tailwindcss@0.6.5:
     resolution: {integrity: sha512-axfeOArc/RiGHjOIy9HytehlC0ZLeMaqY09mm8YCkMzznKiDkwFzOpBvtuhuv3xG5qB73+Mj7OCe2j/L1ryfuQ==}
     engines: {node: '>=14.21.3'}
@@ -6498,6 +6510,9 @@ packages:
 
   solidity-ast@0.4.56:
     resolution: {integrity: sha512-HgmsA/Gfklm/M8GFbCX/J1qkVH0spXHgALCNZ8fA8x5X+MFdn/8CP2gr5OVyXjXw6RZTPC/Sxl2RUDQOXyNMeA==}
+
+  solidity-comments-extractor@0.0.8:
+    resolution: {integrity: sha512-htM7Vn6LhHreR+EglVMd2s+sZhcXAirB1Zlyrv5zBuTxieCvjfnRpd7iZk75m/u6NOlEyQ94C6TWbBn2cY7w8g==}
 
   solidity-coverage@0.8.12:
     resolution: {integrity: sha512-8cOB1PtjnjFRqOgwFiD8DaUsYJtVJ6+YdXQtSZDrLGf8cdhhh8xzTtGzVTGeBf15kTv0v7lYPJlV/az7zLEPJw==}
@@ -9052,7 +9067,7 @@ snapshots:
     dependencies:
       '@ledgerhq/cryptoassets': 5.53.0
       '@ledgerhq/errors': 5.50.0
-      '@ledgerhq/hw-transport': 5.26.0
+      '@ledgerhq/hw-transport': 5.51.1
       bignumber.js: 9.1.2
       rlp: 2.2.7
 
@@ -9069,7 +9084,7 @@ snapshots:
     dependencies:
       '@ledgerhq/devices': 5.51.1
       '@ledgerhq/errors': 5.50.0
-      '@ledgerhq/hw-transport': 5.26.0
+      '@ledgerhq/hw-transport': 5.51.1
       '@ledgerhq/hw-transport-node-hid-noevents': 5.51.1
       '@ledgerhq/logs': 5.50.0
       lodash: 4.17.21
@@ -9080,7 +9095,7 @@ snapshots:
   '@ledgerhq/hw-transport-u2f@5.26.0':
     dependencies:
       '@ledgerhq/errors': 5.50.0
-      '@ledgerhq/hw-transport': 5.26.0
+      '@ledgerhq/hw-transport': 5.51.1
       '@ledgerhq/logs': 5.50.0
       u2f-api: 0.2.7
 
@@ -9095,7 +9110,6 @@ snapshots:
       '@ledgerhq/devices': 5.51.1
       '@ledgerhq/errors': 5.50.0
       events: 3.3.0
-    optional: true
 
   '@ledgerhq/logs@5.50.0': {}
 
@@ -10372,6 +10386,8 @@ snapshots:
   '@solidity-parser/parser@0.14.5':
     dependencies:
       antlr4ts: 0.5.0-alpha.4
+
+  '@solidity-parser/parser@0.17.0': {}
 
   '@solidity-parser/parser@0.18.0': {}
 
@@ -14840,6 +14856,13 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
+  prettier-plugin-solidity@1.3.1(prettier@3.3.3):
+    dependencies:
+      '@solidity-parser/parser': 0.17.0
+      prettier: 3.3.3
+      semver: 7.6.3
+      solidity-comments-extractor: 0.0.8
+
   prettier-plugin-tailwindcss@0.6.5(prettier@3.3.3):
     dependencies:
       prettier: 3.3.3
@@ -15518,6 +15541,8 @@ snapshots:
   solidity-ast@0.4.56:
     dependencies:
       array.prototype.findlast: 1.2.5
+
+  solidity-comments-extractor@0.0.8: {}
 
   solidity-coverage@0.8.12(hardhat@2.22.6(bufferutil@4.0.8)(ts-node@10.9.2(@types/node@20.14.11)(typescript@5.5.3))(typescript@5.5.3)(utf-8-validate@5.0.10)):
     dependencies:
