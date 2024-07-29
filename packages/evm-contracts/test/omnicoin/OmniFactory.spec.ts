@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import hre from 'hardhat';
-import { OmniFactory } from '../typechain-types';
+import { OmniFactory } from '../../typechain-types';
 
 describe('OmniFactory', () => {
   describe('(deployment)', () => {
