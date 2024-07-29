@@ -123,37 +123,41 @@ contract OmniFactory is NonblockingLzApp {
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
     DeployRemoteCoinChainConfig[] memory _remoteConfigs
-  ) public view returns (uint nativeFee, uint zroFee) {
+  ) public view returns (uint256[] memory nativeFees) {
     bytes memory adapterParams = _getAdapterParams();
 
-    DeployRemoteCoin memory deployData = DeployRemoteCoin({
-      _coinName: _coinName,
-      _coinTicker: _coinTicker,
-      _coinDecimals: _coinDecimals,
-      _coinTotalSupply: _coinTotalSupply,
-      _remoteConfigs: DeployRemoteCoinChainConfig({
-        _remoteChainId: _remoteConfigs[0]._remoteChainId,
-        _receiver: _remoteConfigs[0]._receiver,
-        _remoteSupplyAmount: _remoteConfigs[0]._remoteSupplyAmount,
-        _remoteFactoryAddress: _remoteConfigs[0]._remoteFactoryAddress
-      })
-    });
-    bytes memory deployBytes = abi.encode(deployData);
+    nativeFees = new uint256[](_remoteConfigs.length);
+    for (uint256 i = 0; i < _remoteConfigs.length; i++) {
+      DeployRemoteCoin memory deployData = DeployRemoteCoin({
+        _coinName: _coinName,
+        _coinTicker: _coinTicker,
+        _coinDecimals: _coinDecimals,
+        _coinTotalSupply: _coinTotalSupply,
+        _remoteConfigs: DeployRemoteCoinChainConfig({
+          _remoteChainId: _remoteConfigs[i]._remoteChainId,
+          _receiver: _remoteConfigs[i]._receiver,
+          _remoteSupplyAmount: _remoteConfigs[i]._remoteSupplyAmount,
+          _remoteFactoryAddress: _remoteConfigs[i]._remoteFactoryAddress
+        })
+      });
+      bytes memory deployBytes = abi.encode(deployData);
 
-    CrossChainCommand memory cmd = CrossChainCommand({
-      _commandId: CrossChainCommandId.DeployRemoteCoin,
-      _commandData: deployBytes
-    });
-    bytes memory payload = abi.encode(cmd);
+      CrossChainCommand memory cmd = CrossChainCommand({
+        _commandId: CrossChainCommandId.DeployRemoteCoin,
+        _commandData: deployBytes
+      });
+      bytes memory payload = abi.encode(cmd);
 
-    return
-      lzEndpoint.estimateFees(
+      (uint256 nativeFee, ) = lzEndpoint.estimateFees(
         _remoteConfigs[0]._remoteChainId,
         address(this),
         payload,
         false,
         adapterParams
       );
+
+      nativeFees[i] = nativeFee;
+    }
   }
 
   function deployRemoteCoin(
@@ -161,47 +165,51 @@ contract OmniFactory is NonblockingLzApp {
     string memory _coinTicker,
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
-    DeployRemoteCoinChainConfig[] memory _remoteConfigs
+    DeployRemoteCoinChainConfig[] memory _remoteConfigs,
+    uint256[] memory nativeFees
   ) public payable {
     bytes memory adapterParams = _getAdapterParams();
 
-    DeployRemoteCoin memory deployData = DeployRemoteCoin({
-      _coinName: _coinName,
-      _coinTicker: _coinTicker,
-      _coinDecimals: _coinDecimals,
-      _coinTotalSupply: _coinTotalSupply,
-      _remoteConfigs: _remoteConfigs[0]
-    });
-    bytes memory deployBytes = abi.encode(deployData);
+    for (uint256 i = 0; i < _remoteConfigs.length; i++) {
+      DeployRemoteCoin memory deployData = DeployRemoteCoin({
+        _coinName: _coinName,
+        _coinTicker: _coinTicker,
+        _coinDecimals: _coinDecimals,
+        _coinTotalSupply: _coinTotalSupply,
+        _remoteConfigs: _remoteConfigs[i]
+      });
+      bytes memory deployBytes = abi.encode(deployData);
 
-    CrossChainCommand memory cmd = CrossChainCommand({
-      _commandId: CrossChainCommandId.DeployRemoteCoin,
-      _commandData: deployBytes
-    });
-    bytes memory payload = abi.encode(cmd);
+      CrossChainCommand memory cmd = CrossChainCommand({
+        _commandId: CrossChainCommandId.DeployRemoteCoin,
+        _commandData: deployBytes
+      });
+      bytes memory payload = abi.encode(cmd);
 
-    _lzSend(
-      _remoteConfigs[0]._remoteChainId,
-      payload,
-      payable(msg.sender),
-      address(0x0),
-      adapterParams,
-      address(this).balance
-    );
+      _lzSend(
+        _remoteConfigs[i]._remoteChainId,
+        payload,
+        payable(msg.sender),
+        address(0x0),
+        adapterParams,
+        nativeFees[i]
+      );
 
-    emit RemoteCoinDeployed(
-      _remoteConfigs[0]._remoteFactoryAddress,
-      msg.sender,
-      _remoteConfigs[0]._remoteChainId
-    );
+      emit RemoteCoinDeployed(
+        _remoteConfigs[i]._remoteFactoryAddress,
+        msg.sender,
+        _remoteConfigs[i]._remoteChainId
+      );
+    }
   }
 
-  function _getAdapterParams() internal pure returns (bytes memory adapterParams) {
+  function _getAdapterParams()
+    internal
+    pure
+    returns (bytes memory adapterParams)
+  {
     uint16 version = 1;
-    adapterParams = abi.encodePacked(
-      version,
-      gasForDestinationLzReceive
-    );
+    adapterParams = abi.encodePacked(version, gasForDestinationLzReceive);
   }
 
   // allow this contract to receive ether

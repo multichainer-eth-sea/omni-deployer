@@ -142,7 +142,7 @@ describe('OmniFactory', () => {
 
       // ---------- act ---------- //
       // get fees
-      const [nativeFee] = await factoryContractA.estimateFee(
+      const nativeFees = await factoryContractA.estimateFee(
         coinDetails.name,
         coinDetails.symbol,
         coinDetails.decimals,
@@ -156,6 +156,7 @@ describe('OmniFactory', () => {
           },
         ],
       );
+      const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
       // run deployLocalCoin()
       await (
@@ -172,7 +173,8 @@ describe('OmniFactory', () => {
               _remoteFactoryAddress: factoryContractAddressB,
             },
           ],
-          { value: nativeFee },
+          nativeFees.map((fee) => fee.toString()),
+          { value: totalNativeFees },
         )
       ).wait();
 
