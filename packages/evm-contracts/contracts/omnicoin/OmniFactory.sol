@@ -17,6 +17,11 @@ struct CrossChainCommand {
   bytes _commandData;
 }
 
+struct GossipRemoteCoin {
+  bytes _deployedRemoteCoinAddress;
+  bytes _deployedRemoteCoinBytes;
+}
+
 struct DeployRemoteCoin {
   string _coinName;
   string _coinTicker;
@@ -41,6 +46,14 @@ contract OmniFactory is NonblockingLzApp {
     address indexed remoteFactoryAddress,
     address indexed creator,
     uint16 indexed chainId
+  );
+  event RemoteCoinGossiped(uint16 indexed chainId, bytes remoteCoinData);
+  event RemoteCoinGossipReceived(
+    address indexed coinAddress,
+    uint16 indexed remoteChainId,
+    address indexed receiver,
+    uint256 remoteSupplyAmount,
+    address remoteFactoryAddress
   );
 
   uint256 internal constant gasForDestinationLzReceive = 3500000;
@@ -71,12 +84,39 @@ contract OmniFactory is NonblockingLzApp {
         coinData._remoteConfig._receiver
       );
 
-      _gossipNewCoin(_srcChainId, address(newCoin), cmd._commandData);
+      _gossipNewCoin(
+        _srcChainId,
+        address(newCoin),
+        coinData,
+        payable(coinData._remoteConfig._receiver)
+      );
+
       return;
     }
 
     if (cmd._commandId == CrossChainCommandId.GossipRemoteCoin) {
-      // ...
+      GossipRemoteCoin memory gossipData = abi.decode(
+        cmd._commandData,
+        (GossipRemoteCoin)
+      );
+      address coinAddress = abi.decode(
+        gossipData._deployedRemoteCoinAddress,
+        (address)
+      );
+      DeployRemoteCoin memory coinData = abi.decode(
+        gossipData._deployedRemoteCoinBytes,
+        (DeployRemoteCoin)
+      );
+
+      emit RemoteCoinGossipReceived(
+        coinAddress,
+        coinData._remoteConfig._remoteChainId,
+        coinData._remoteConfig._receiver,
+        coinData._remoteConfig._remoteSupplyAmount,
+        coinData._remoteConfig._remoteFactoryAddress
+      );
+
+      return;
     }
   }
 
@@ -84,9 +124,34 @@ contract OmniFactory is NonblockingLzApp {
   function _gossipNewCoin(
     uint16 _srcChainId,
     address _deployedCoinAddress,
-    bytes memory _deployedCoinData
+    DeployRemoteCoin memory _deployedRemoteCoinData,
+    address payable _receiver
   ) internal {
-    // ...
+    GossipRemoteCoin memory gossipData = GossipRemoteCoin({
+      _deployedRemoteCoinAddress: abi.encode(_deployedCoinAddress),
+      _deployedRemoteCoinBytes: abi.encode(_deployedRemoteCoinData)
+    });
+    bytes memory gossipBytes = abi.encode(gossipData);
+    bytes memory payload = _prepareCommandBytes(
+      CrossChainCommandId.DeployRemoteCoin,
+      gossipBytes
+    );
+
+    // TODO(dims): calculate native fee
+    // uint16 _dstChainId,
+    // bytes memory _payload,
+    // address payable _refundAddress,
+    // address _zroPaymentAddress,
+    // bytes memory _adapterParams,
+    // uint _nativeFee
+    _lzSend(
+      _srcChainId,
+      payload,
+      _receiver,
+      address(0x0),
+      _getAdapterParams(),
+      0
+    );
   }
 
   function deployLocalCoin(
