@@ -247,7 +247,7 @@ describe('OmniFactory', () => {
           coinDetailsRemoteConfig[i].remoteSupplyAmount,
         );
         console.log({
-          chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex], 
+          chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
           coinDeployedAddress,
           totalSupplyActual: totalSupply,
           totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
