@@ -174,34 +174,44 @@ contract OmniFactory is NonblockingLzApp {
     bytes memory adapterParams = _getAdapterParams();
 
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
-      DeployRemoteCoin memory deployData = DeployRemoteCoin({
-        _coinName: _coinName,
-        _coinTicker: _coinTicker,
-        _coinDecimals: _coinDecimals,
-        _coinTotalSupply: _coinTotalSupply,
-        _remoteConfig: _remoteConfigs[i]
-      });
-      bytes memory deployBytes = abi.encode(deployData);
+      if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {
+        _deployLocalCoin(
+          _coinName,
+          _coinTicker,
+          _coinDecimals,
+          _remoteConfigs[i]._remoteSupplyAmount,
+          _remoteConfigs[i]._receiver
+        );
+      } else {
+        DeployRemoteCoin memory deployData = DeployRemoteCoin({
+          _coinName: _coinName,
+          _coinTicker: _coinTicker,
+          _coinDecimals: _coinDecimals,
+          _coinTotalSupply: _coinTotalSupply,
+          _remoteConfig: _remoteConfigs[i]
+        });
+        bytes memory deployBytes = abi.encode(deployData);
 
-      bytes memory payload = _prepareCommandBytes(
-        CrossChainCommandId.DeployRemoteCoin,
-        deployBytes
-      );
+        bytes memory payload = _prepareCommandBytes(
+          CrossChainCommandId.DeployRemoteCoin,
+          deployBytes
+        );
 
-      _lzSend(
-        _remoteConfigs[i]._remoteChainId,
-        payload,
-        payable(msg.sender),
-        address(0x0),
-        adapterParams,
-        nativeFees[i]
-      );
+        _lzSend(
+          _remoteConfigs[i]._remoteChainId,
+          payload,
+          payable(msg.sender),
+          address(0x0),
+          adapterParams,
+          nativeFees[i]
+        );
 
-      emit RemoteCoinDeployed(
-        _remoteConfigs[i]._remoteFactoryAddress,
-        msg.sender,
-        _remoteConfigs[i]._remoteChainId
-      );
+        emit RemoteCoinDeployed(
+          _remoteConfigs[i]._remoteFactoryAddress,
+          msg.sender,
+          _remoteConfigs[i]._remoteChainId
+        );
+      }
     }
   }
 
