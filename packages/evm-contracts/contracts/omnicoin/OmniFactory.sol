@@ -124,11 +124,7 @@ contract OmniFactory is NonblockingLzApp {
     uint256 _coinTotalSupply,
     DeployRemoteCoinChainConfig[] memory _remoteConfigs
   ) public view returns (uint nativeFee, uint zroFee) {
-    uint16 version = 1;
-    bytes memory adapterParams = abi.encodePacked(
-      version,
-      gasForDestinationLzReceive
-    );
+    bytes memory adapterParams = _getAdapterParams();
 
     DeployRemoteCoin memory deployData = DeployRemoteCoin({
       _coinName: _coinName,
@@ -167,11 +163,7 @@ contract OmniFactory is NonblockingLzApp {
     uint256 _coinTotalSupply,
     DeployRemoteCoinChainConfig[] memory _remoteConfigs
   ) public payable {
-    uint16 version = 1;
-    bytes memory adapterParams = abi.encodePacked(
-      version,
-      gasForDestinationLzReceive
-    );
+    bytes memory adapterParams = _getAdapterParams();
 
     DeployRemoteCoin memory deployData = DeployRemoteCoin({
       _coinName: _coinName,
@@ -201,6 +193,14 @@ contract OmniFactory is NonblockingLzApp {
       _remoteConfigs[0]._remoteFactoryAddress,
       msg.sender,
       _remoteConfigs[0]._remoteChainId
+    );
+  }
+
+  function _getAdapterParams() internal pure returns (bytes memory adapterParams) {
+    uint16 version = 1;
+    adapterParams = abi.encodePacked(
+      version,
+      gasForDestinationLzReceive
     );
   }
 
