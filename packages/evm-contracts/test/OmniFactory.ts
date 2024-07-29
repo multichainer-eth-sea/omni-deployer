@@ -83,6 +83,7 @@ describe('OmniFactory', () => {
       );
     });
   });
+
   describe('deployRemoteCoin()', () => {
     const prepareTestEnvironments = async (chainIds: number[]) => {
       // prepare the endpoints
@@ -143,6 +144,42 @@ describe('OmniFactory', () => {
         omniFactoryAddresses,
       };
     };
+
+    type CoinDetailsRemoteConfig = {
+      remoteChainId: number;
+      receiver: string;
+      remoteSupplyAmount: string;
+      remoteFactoryAddress: string;
+    };
+    type CoinDetails = {
+      name: string;
+      symbol: string;
+      decimals: string;
+      totalSupply: string;
+      remoteConfigs: CoinDetailsRemoteConfig[];
+    };
+
+    const getEstimatedFees = async (
+      omniFactory: OmniFactory,
+      coinDetails: CoinDetails,
+    ) => {
+      const nativeFees = await omniFactory.estimateFee(
+        coinDetails.name,
+        coinDetails.symbol,
+        coinDetails.decimals,
+        coinDetails.totalSupply,
+        coinDetails.remoteConfigs.map((config) => ({
+          _remoteChainId: config.remoteChainId,
+          _receiver: config.receiver,
+          _remoteSupplyAmount: config.remoteSupplyAmount,
+          _remoteFactoryAddress: config.remoteFactoryAddress,
+        })),
+      );
+      const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
+
+      return { nativeFees, totalNativeFees };
+    };
+
     const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
       const [localCoinDeployedEvent] = await omniFactory.queryFilter(
         omniFactory.filters.LocalCoinDeployed(),
@@ -181,7 +218,7 @@ describe('OmniFactory', () => {
         },
       ];
 
-      const coinDetails = {
+      const coinDetails: CoinDetails = {
         name: 'Omni Pepe',
         symbol: 'POPO',
         decimals: '18',
@@ -194,22 +231,13 @@ describe('OmniFactory', () => {
         })),
       };
 
-      // ---------- act ---------- //
       // get fees
-      const nativeFees = await omniFactories[0].estimateFee(
-        coinDetails.name,
-        coinDetails.symbol,
-        coinDetails.decimals,
-        coinDetails.totalSupply,
-        coinDetails.remoteConfigs.map((config) => ({
-          _remoteChainId: config.remoteChainId,
-          _receiver: config.receiver,
-          _remoteSupplyAmount: config.remoteSupplyAmount,
-          _remoteFactoryAddress: config.remoteFactoryAddress,
-        })),
+      const { nativeFees, totalNativeFees } = await getEstimatedFees(
+        omniFactories[0],
+        coinDetails,
       );
-      const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
+      // ---------- act ---------- //
       // run deployRemoteCoin()
       await (
         await omniFactories[0].deployRemoteCoin(
@@ -296,7 +324,7 @@ describe('OmniFactory', () => {
         },
       ];
 
-      const coinDetails = {
+      const coinDetails: CoinDetails = {
         name: 'Omni Pepe',
         symbol: 'POPO',
         decimals: '18',
@@ -309,22 +337,13 @@ describe('OmniFactory', () => {
         })),
       };
 
-      // ---------- act ---------- //
       // get fees
-      const nativeFees = await omniFactories[0].estimateFee(
-        coinDetails.name,
-        coinDetails.symbol,
-        coinDetails.decimals,
-        coinDetails.totalSupply,
-        coinDetails.remoteConfigs.map((config) => ({
-          _remoteChainId: config.remoteChainId,
-          _receiver: config.receiver,
-          _remoteSupplyAmount: config.remoteSupplyAmount,
-          _remoteFactoryAddress: config.remoteFactoryAddress,
-        })),
+      const { nativeFees, totalNativeFees } = await getEstimatedFees(
+        omniFactories[0],
+        coinDetails,
       );
-      const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
+      // ---------- act ---------- //
       // run deployRemoteCoin()
       await (
         await omniFactories[0].deployRemoteCoin(
