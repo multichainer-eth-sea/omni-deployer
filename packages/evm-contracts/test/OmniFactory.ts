@@ -83,10 +83,10 @@ describe('OmniFactory', () => {
     });
   });
   describe('deployRemoteCoin()', () => {
-    it('should deploy coin on single remote chain', async () => {
+    it('should deploy coin on other remote chains', async () => {
       // ---------- arrange ---------- //
       // prepare the chain id
-      const [CHAIN_A, CHAIN_B] = [69, 420];
+      const [CHAIN_A, CHAIN_B, CHAIN_C] = [69, 420, 777];
 
       // prepare the owner
       const [owner] = await hre.ethers.getSigners();
@@ -96,22 +96,34 @@ describe('OmniFactory', () => {
         await hre.ethers.getContractFactory('LZEndpointMock');
       const lzEndpointA = await LZEndpointMock.deploy(CHAIN_A);
       const lzEndpointB = await LZEndpointMock.deploy(CHAIN_B);
+      const lzEndpointC = await LZEndpointMock.deploy(CHAIN_C);
       const lzEndpointAddressA = await lzEndpointA.getAddress();
       const lzEndpointAddressB = await lzEndpointB.getAddress();
+      const lzEndpointAddressC = await lzEndpointC.getAddress();
 
       // deploy the factory contract
       const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
       const factoryContractA = await OmniFactory.deploy(lzEndpointAddressA);
       const factoryContractB = await OmniFactory.deploy(lzEndpointAddressB);
+      const factoryContractC = await OmniFactory.deploy(lzEndpointAddressC);
       const factoryContractAddressA = await factoryContractA.getAddress();
       const factoryContractAddressB = await factoryContractB.getAddress();
+      const factoryContractAddressC = await factoryContractC.getAddress();
 
       // set lzmock endpoint address
       await lzEndpointA.setDestLzEndpoint(
         factoryContractAddressB,
         lzEndpointAddressB,
       );
+      await lzEndpointA.setDestLzEndpoint(
+        factoryContractAddressC,
+        lzEndpointAddressC,
+      );
       await lzEndpointB.setDestLzEndpoint(
+        factoryContractAddressA,
+        lzEndpointAddressA,
+      );
+      await lzEndpointC.setDestLzEndpoint(
         factoryContractAddressA,
         lzEndpointAddressA,
       );
@@ -124,11 +136,25 @@ describe('OmniFactory', () => {
           [factoryContractAddressB, factoryContractAddressA],
         ),
       );
+      factoryContractA.setTrustedRemote(
+        CHAIN_C,
+        hre.ethers.solidityPacked(
+          ['address', 'address'],
+          [factoryContractAddressC, factoryContractAddressA],
+        ),
+      );
       factoryContractB.setTrustedRemote(
         CHAIN_A,
         hre.ethers.solidityPacked(
           ['address', 'address'],
           [factoryContractAddressA, factoryContractAddressB],
+        ),
+      );
+      factoryContractC.setTrustedRemote(
+        CHAIN_A,
+        hre.ethers.solidityPacked(
+          ['address', 'address'],
+          [factoryContractAddressA, factoryContractAddressC],
         ),
       );
 
@@ -138,6 +164,20 @@ describe('OmniFactory', () => {
         symbol: 'POPO',
         decimals: '18',
         totalSupply: '1000000000000000000000',
+        remoteConfigs: [
+          {
+            remoteChainId: CHAIN_B,
+            receiver: owner.address,
+            remoteSupplyAmount: '750000000000000000000',
+            remoteFactoryAddress: factoryContractAddressB,
+          },
+          {
+            remoteChainId: CHAIN_C,
+            receiver: owner.address,
+            remoteSupplyAmount: '250000000000000000000',
+            remoteFactoryAddress: factoryContractAddressC,
+          },
+        ],
       };
 
       // ---------- act ---------- //
@@ -147,14 +187,12 @@ describe('OmniFactory', () => {
         coinDetails.symbol,
         coinDetails.decimals,
         coinDetails.totalSupply,
-        [
-          {
-            _remoteChainId: CHAIN_B,
-            _receiver: owner.address,
-            _remoteSupplyAmount: coinDetails.totalSupply,
-            _remoteFactoryAddress: factoryContractAddressB,
-          },
-        ],
+        coinDetails.remoteConfigs.map((config) => ({
+          _remoteChainId: config.remoteChainId,
+          _receiver: config.receiver,
+          _remoteSupplyAmount: config.remoteSupplyAmount,
+          _remoteFactoryAddress: config.remoteFactoryAddress,
+        })),
       );
       const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
@@ -165,14 +203,12 @@ describe('OmniFactory', () => {
           coinDetails.symbol,
           coinDetails.decimals,
           coinDetails.totalSupply,
-          [
-            {
-              _remoteChainId: CHAIN_B,
-              _receiver: owner.address,
-              _remoteSupplyAmount: coinDetails.totalSupply,
-              _remoteFactoryAddress: factoryContractAddressB,
-            },
-          ],
+          coinDetails.remoteConfigs.map((config) => ({
+            _remoteChainId: config.remoteChainId,
+            _receiver: config.receiver,
+            _remoteSupplyAmount: config.remoteSupplyAmount,
+            _remoteFactoryAddress: config.remoteFactoryAddress,
+          })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
         )
@@ -183,24 +219,41 @@ describe('OmniFactory', () => {
         factoryContractB.filters.LocalCoinDeployed(),
         'latest',
       );
-      const [coinDeployedAddress, receiver] = localCoinDeployedEventB.args;
+      const [coinDeployedAddressB, receiverB] = localCoinDeployedEventB.args;
+
+      const [localCoinDeployedEventC] = await factoryContractC.queryFilter(
+        factoryContractC.filters.LocalCoinDeployed(),
+        'latest',
+      );
+      const [coinDeployedAddressC, receiverC] = localCoinDeployedEventC.args;
 
       // connect to coin deployed contract
-      const coinDeployed = await hre.ethers.getContractAt(
+      const coinDeployedB = await hre.ethers.getContractAt(
         'OmniCoin',
-        coinDeployedAddress,
+        coinDeployedAddressB,
+      );
+      const coinDeployedC = await hre.ethers.getContractAt(
+        'OmniCoin',
+        coinDeployedAddressC,
       );
 
       // ---------- assert ---------- //
-      expect(coinDeployedAddress).to.not.be.empty;
-      expect(receiver).to.equal(owner.address);
-      expect(await coinDeployed.name()).to.equal(coinDetails.name);
-      expect(await coinDeployed.symbol()).to.equal(coinDetails.symbol);
-      expect(await coinDeployed.decimals()).to.equal(coinDetails.decimals);
-      expect(await coinDeployed.totalSupply()).to.equal(
-        coinDetails.totalSupply,
+      expect(coinDeployedAddressB).to.not.be.empty;
+      expect(receiverB).to.equal(owner.address);
+      expect(await coinDeployedB.name()).to.equal(coinDetails.name);
+      expect(await coinDeployedB.symbol()).to.equal(coinDetails.symbol);
+      expect(await coinDeployedB.decimals()).to.equal(coinDetails.decimals);
+      expect(await coinDeployedB.totalSupply()).to.equal(
+        '750000000000000000000',
+      );
+      expect(coinDeployedAddressC).to.not.be.empty;
+      expect(receiverC).to.equal(owner.address);
+      expect(await coinDeployedC.name()).to.equal(coinDetails.name);
+      expect(await coinDeployedC.symbol()).to.equal(coinDetails.symbol);
+      expect(await coinDeployedC.decimals()).to.equal(coinDetails.decimals);
+      expect(await coinDeployedC.totalSupply()).to.equal(
+        '250000000000000000000',
       );
     });
-    it('should deploy coin on multiple remote chains', async () => {});
   });
 });
