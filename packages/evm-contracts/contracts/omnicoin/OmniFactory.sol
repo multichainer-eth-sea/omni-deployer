@@ -22,7 +22,7 @@ struct DeployRemoteCoin {
   string _coinTicker;
   uint8 _coinDecimals;
   uint256 _coinTotalSupply;
-  DeployRemoteCoinChainConfig _remoteConfigs;
+  DeployRemoteCoinChainConfig _remoteConfig;
 }
 
 struct DeployRemoteCoinChainConfig {
@@ -67,8 +67,8 @@ contract OmniFactory is NonblockingLzApp {
         coinData._coinName,
         coinData._coinTicker,
         coinData._coinDecimals,
-        coinData._remoteConfigs._remoteSupplyAmount,
-        coinData._remoteConfigs._receiver
+        coinData._remoteConfig._remoteSupplyAmount,
+        coinData._remoteConfig._receiver
       );
 
       _gossipNewCoin(_srcChainId, address(newCoin), cmd._commandData);
@@ -137,7 +137,7 @@ contract OmniFactory is NonblockingLzApp {
         _coinTicker: _coinTicker,
         _coinDecimals: _coinDecimals,
         _coinTotalSupply: _coinTotalSupply,
-        _remoteConfigs: DeployRemoteCoinChainConfig({
+        _remoteConfig: DeployRemoteCoinChainConfig({
           _remoteChainId: _remoteConfigs[i]._remoteChainId,
           _receiver: _remoteConfigs[i]._receiver,
           _remoteSupplyAmount: _remoteConfigs[i]._remoteSupplyAmount,
@@ -180,7 +180,7 @@ contract OmniFactory is NonblockingLzApp {
         _coinTicker: _coinTicker,
         _coinDecimals: _coinDecimals,
         _coinTotalSupply: _coinTotalSupply,
-        _remoteConfigs: _remoteConfigs[i]
+        _remoteConfig: _remoteConfigs[i]
       });
       bytes memory deployBytes = abi.encode(deployData);
 
