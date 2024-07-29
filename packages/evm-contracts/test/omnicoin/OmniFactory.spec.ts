@@ -174,12 +174,12 @@ describe('OmniFactory', () => {
           coinDetailsRemoteConfig[i].remoteSupplyAmount,
         );
 
-        console.log({
-          chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
-          coinDeployedAddress,
-          totalSupplyActual: totalSupply,
-          totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
-        });
+        // console.log({
+        //   chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
+        //   coinDeployedAddress,
+        //   totalSupplyActual: totalSupply,
+        //   totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
+        // });
       }
     });
 
@@ -280,12 +280,12 @@ describe('OmniFactory', () => {
           coinDetailsRemoteConfig[i].remoteSupplyAmount,
         );
 
-        console.log({
-          chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
-          coinDeployedAddress,
-          totalSupplyActual: totalSupply,
-          totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
-        });
+        // console.log({
+        //   chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
+        //   coinDeployedAddress,
+        //   totalSupplyActual: totalSupply,
+        //   totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
+        // });
       }
     });
 
@@ -293,7 +293,7 @@ describe('OmniFactory', () => {
       // ---------- arrange ---------- //
       // prepare the test environment
       const { chainIds, omniFactoryAddresses, omniFactories } =
-        await prepareTestEnvironments([69, 420, 1337]);
+        await prepareTestEnvironments([69, 420, 1337], true);
 
       // prepare the owner
       const [owner] = await hre.ethers.getSigners();
@@ -303,7 +303,7 @@ describe('OmniFactory', () => {
         {
           chainIdIndex: 1,
           receiverAddress: owner.address,
-          remoteSupplyAmount: '750000000000000000000',
+          remoteSupplyAmount: '1000000000000000000000',
         },
       ];
 

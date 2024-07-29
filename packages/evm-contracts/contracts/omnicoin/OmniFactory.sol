@@ -58,9 +58,15 @@ contract OmniFactory is NonblockingLzApp {
 
   uint256 internal constant gasForDestinationLzReceive = 3500000;
 
+  bool public isGossipEnabled = false;
+
   constructor(
     address _endpoint
   ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
+
+  function setIsGossipEnabled(bool _isGossipEnabled) public onlyOwner {
+    isGossipEnabled = _isGossipEnabled;
+  }
 
   function _nonblockingLzReceive(
     uint16 _srcChainId,
@@ -88,12 +94,14 @@ contract OmniFactory is NonblockingLzApp {
       console.log("chainId", lzEndpoint.getChainId());
       console.log("address(newCoin)", address(newCoin));
 
-      _gossipNewCoin(
-        _srcChainId,
-        address(newCoin),
-        coinData,
-        payable(coinData._remoteConfig._receiver)
-      );
+      if (isGossipEnabled) {
+        _gossipNewCoin(
+          _srcChainId,
+          address(newCoin),
+          coinData,
+          payable(coinData._remoteConfig._receiver)
+        );
+      }
 
       return;
     }
@@ -164,7 +172,6 @@ contract OmniFactory is NonblockingLzApp {
     console.log("gossip succeed");
     console.log("chainId", lzEndpoint.getChainId());
     // console.log("address(newCoin)", address(newCoin));
-
   }
 
   function deployLocalCoin(
@@ -206,8 +213,6 @@ contract OmniFactory is NonblockingLzApp {
     uint256 _coinTotalSupply,
     DeployRemoteCoinChainConfig[] memory _remoteConfigs
   ) public view returns (uint256[] memory nativeFees) {
-    bytes memory adapterParams = _getAdapterParams();
-
     nativeFees = new uint256[](_remoteConfigs.length);
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
       if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {
@@ -227,22 +232,63 @@ contract OmniFactory is NonblockingLzApp {
         });
         bytes memory deployBytes = abi.encode(deployData);
 
-        bytes memory payload = _prepareCommandBytes(
-          CrossChainCommandId.DeployRemoteCoin,
+        uint256 deployFee = _calculateDeployCoinFee(
+          _remoteConfigs[i]._remoteChainId,
+          deployBytes
+        );
+        uint256 gossipFee = _calculateGossipCoinFee(
+          _remoteConfigs[i]._remoteChainId,
           deployBytes
         );
 
-        (uint256 nativeFee, ) = lzEndpoint.estimateFees(
-          _remoteConfigs[0]._remoteChainId,
-          address(this),
-          payload,
-          false,
-          adapterParams
-        );
-
-        nativeFees[i] = nativeFee;
+        nativeFees[i] = deployFee + gossipFee;
       }
     }
+  }
+
+  function _calculateGossipCoinFee(
+    uint16 _remoteChainId,
+    bytes memory _deployBytes
+  ) internal view returns (uint256 gossipNativeFee) {
+    GossipRemoteCoin memory gossipData = GossipRemoteCoin({
+      _deployedRemoteCoinAddress: abi.encode(address(0)),
+      _deployedRemoteCoinBytes: abi.encode(_deployBytes)
+    });
+    bytes memory gossipBytes = abi.encode(gossipData);
+    bytes memory payload = _prepareCommandBytes(
+      CrossChainCommandId.DeployRemoteCoin,
+      gossipBytes
+    );
+
+    (uint256 nativeFee, ) = lzEndpoint.estimateFees(
+      _remoteChainId,
+      address(this),
+      payload,
+      false,
+      _getAdapterParams()
+    );
+
+    gossipNativeFee = nativeFee;
+  }
+
+  function _calculateDeployCoinFee(
+    uint16 _remoteChainId,
+    bytes memory _deployBytes
+  ) internal view returns (uint256 deployNativeFee) {
+    bytes memory payload = _prepareCommandBytes(
+      CrossChainCommandId.DeployRemoteCoin,
+      _deployBytes
+    );
+
+    (uint256 nativeFee, ) = lzEndpoint.estimateFees(
+      _remoteChainId,
+      address(this),
+      payload,
+      false,
+      _getAdapterParams()
+    );
+
+    deployNativeFee = nativeFee;
   }
 
   function deployRemoteCoin(
