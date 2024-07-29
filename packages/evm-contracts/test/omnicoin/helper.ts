@@ -105,3 +105,25 @@ export const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
 
   return { coinDeployed, coinDeployedAddress, receiverAddress };
 };
+
+export const getRemoteCoinGossipReceived = async (omniFactory: OmniFactory) => {
+  const [remoteCoinGossipReceivedEvent] = await omniFactory.queryFilter(
+    omniFactory.filters.RemoteCoinGossipReceived(),
+    'latest',
+  );
+  const [
+    coinAddress,
+    remoteChainId,
+    receiver,
+    remoteSupplyAmount,
+    remoteFactoryAddress,
+  ] = remoteCoinGossipReceivedEvent.args;
+
+  return {
+    coinAddress,
+    remoteChainId,
+    receiver,
+    remoteSupplyAmount,
+    remoteFactoryAddress,
+  };
+};
