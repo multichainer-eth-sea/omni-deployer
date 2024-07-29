@@ -132,34 +132,38 @@ contract OmniFactory is NonblockingLzApp {
 
     nativeFees = new uint256[](_remoteConfigs.length);
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
-      DeployRemoteCoin memory deployData = DeployRemoteCoin({
-        _coinName: _coinName,
-        _coinTicker: _coinTicker,
-        _coinDecimals: _coinDecimals,
-        _coinTotalSupply: _coinTotalSupply,
-        _remoteConfig: DeployRemoteCoinChainConfig({
-          _remoteChainId: _remoteConfigs[i]._remoteChainId,
-          _receiver: _remoteConfigs[i]._receiver,
-          _remoteSupplyAmount: _remoteConfigs[i]._remoteSupplyAmount,
-          _remoteFactoryAddress: _remoteConfigs[i]._remoteFactoryAddress
-        })
-      });
-      bytes memory deployBytes = abi.encode(deployData);
+      if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {
+        nativeFees[i] = 0;
+      } else {
+        DeployRemoteCoin memory deployData = DeployRemoteCoin({
+          _coinName: _coinName,
+          _coinTicker: _coinTicker,
+          _coinDecimals: _coinDecimals,
+          _coinTotalSupply: _coinTotalSupply,
+          _remoteConfig: DeployRemoteCoinChainConfig({
+            _remoteChainId: _remoteConfigs[i]._remoteChainId,
+            _receiver: _remoteConfigs[i]._receiver,
+            _remoteSupplyAmount: _remoteConfigs[i]._remoteSupplyAmount,
+            _remoteFactoryAddress: _remoteConfigs[i]._remoteFactoryAddress
+          })
+        });
+        bytes memory deployBytes = abi.encode(deployData);
 
-      bytes memory payload = _prepareCommandBytes(
-        CrossChainCommandId.DeployRemoteCoin,
-        deployBytes
-      );
+        bytes memory payload = _prepareCommandBytes(
+          CrossChainCommandId.DeployRemoteCoin,
+          deployBytes
+        );
 
-      (uint256 nativeFee, ) = lzEndpoint.estimateFees(
-        _remoteConfigs[0]._remoteChainId,
-        address(this),
-        payload,
-        false,
-        adapterParams
-      );
+        (uint256 nativeFee, ) = lzEndpoint.estimateFees(
+          _remoteConfigs[0]._remoteChainId,
+          address(this),
+          payload,
+          false,
+          adapterParams
+        );
 
-      nativeFees[i] = nativeFee;
+        nativeFees[i] = nativeFee;
+      }
     }
   }
 
