@@ -129,28 +129,28 @@ describe('OmniFactory', () => {
       );
 
       // set trusted network
-      factoryContractA.setTrustedRemote(
+      await factoryContractA.setTrustedRemote(
         CHAIN_B,
         hre.ethers.solidityPacked(
           ['address', 'address'],
           [factoryContractAddressB, factoryContractAddressA],
         ),
       );
-      factoryContractA.setTrustedRemote(
+      await factoryContractA.setTrustedRemote(
         CHAIN_C,
         hre.ethers.solidityPacked(
           ['address', 'address'],
           [factoryContractAddressC, factoryContractAddressA],
         ),
       );
-      factoryContractB.setTrustedRemote(
+      await factoryContractB.setTrustedRemote(
         CHAIN_A,
         hre.ethers.solidityPacked(
           ['address', 'address'],
           [factoryContractAddressA, factoryContractAddressB],
         ),
       );
-      factoryContractC.setTrustedRemote(
+      await factoryContractC.setTrustedRemote(
         CHAIN_A,
         hre.ethers.solidityPacked(
           ['address', 'address'],
@@ -254,6 +254,14 @@ describe('OmniFactory', () => {
       expect(await coinDeployedC.totalSupply()).to.equal(
         '250000000000000000000',
       );
+    });
+
+    it('should deploy coin on this and others remote chains', async () => {
+      // need to tidy up the test so it uses DRY principle
+    });
+
+    it('should gossip back the deployment data to the entry point chain', async () => {
+      // need to tidy up the test so it uses DRY principle
     });
   });
 });
