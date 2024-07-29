@@ -1,6 +1,11 @@
 import { expect } from 'chai';
 import hre from 'hardhat';
-import { OmniFactory } from '../../typechain-types';
+import {
+  prepareTestEnvironments,
+  getEstimatedFees,
+  getLocalCoinDeployedAddress,
+  CoinDetails,
+} from './helper';
 
 describe('OmniFactory', () => {
   describe('(deployment)', () => {
@@ -38,7 +43,7 @@ describe('OmniFactory', () => {
 
       // deploy the factory contract
       const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
-      const factoryContract = await OmniFactory.deploy(lzEndpointAddress);
+      const omniFactory = await OmniFactory.deploy(lzEndpointAddress);
 
       // prepare the coin details
       const coinDetails = {
@@ -51,7 +56,7 @@ describe('OmniFactory', () => {
       // ---------- act ---------- //
       // run deployLocalCoin()
       await (
-        await factoryContract.deployLocalCoin(
+        await omniFactory.deployLocalCoin(
           coinDetails.name,
           coinDetails.symbol,
           coinDetails.decimals,
@@ -60,21 +65,12 @@ describe('OmniFactory', () => {
       ).wait();
 
       // retreive the coin address deployed
-      const [localCoinDeployedEvent] = await factoryContract.queryFilter(
-        factoryContract.filters.LocalCoinDeployed(),
-        'latest',
-      );
-      const [coinDeployedAddress, receiver] = localCoinDeployedEvent.args;
-
-      // connect to coin deployed contract
-      const coinDeployed = await hre.ethers.getContractAt(
-        'OmniCoin',
-        coinDeployedAddress,
-      );
+      const { coinDeployedAddress, receiverAddress, coinDeployed } =
+        await getLocalCoinDeployedAddress(omniFactory);
 
       // ---------- assert ---------- //
       expect(coinDeployedAddress).to.not.be.empty;
-      expect(receiver).to.equal(owner.address);
+      expect(receiverAddress).to.equal(owner.address);
       expect(await coinDeployed.name()).to.equal(coinDetails.name);
       expect(await coinDeployed.symbol()).to.equal(coinDetails.symbol);
       expect(await coinDeployed.decimals()).to.equal(coinDetails.decimals);
@@ -85,116 +81,6 @@ describe('OmniFactory', () => {
   });
 
   describe('deployRemoteCoin()', () => {
-    const prepareTestEnvironments = async (chainIds: number[]) => {
-      // prepare the endpoints
-      const LZEndpointMock =
-        await hre.ethers.getContractFactory('LZEndpointMock');
-      const lzEndpoints = await Promise.all(
-        chainIds.map(async (chainId) => await LZEndpointMock.deploy(chainId)),
-      );
-      const lzEndpointAddresses = await Promise.all(
-        lzEndpoints.map(async (lzEndpoint) => await lzEndpoint.getAddress()),
-      );
-
-      // deploy the factory contract
-      const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
-      const omniFactories = await Promise.all(
-        lzEndpointAddresses.map(
-          async (lzEndpointAddress) =>
-            await OmniFactory.deploy(lzEndpointAddress),
-        ),
-      );
-      const omniFactoryAddresses = await Promise.all(
-        omniFactories.map(
-          async (omniFactory) => await omniFactory.getAddress(),
-        ),
-      );
-
-      // set lzmock endpoint address
-      for (let i = 0; i < chainIds.length; i++) {
-        for (let j = 0; j < chainIds.length; j++) {
-          if (i !== j) {
-            await lzEndpoints[i].setDestLzEndpoint(
-              omniFactoryAddresses[j],
-              lzEndpointAddresses[j],
-            );
-          }
-        }
-      }
-
-      // set trusted network
-      for (let i = 0; i < chainIds.length; i++) {
-        for (let j = 0; j < chainIds.length; j++) {
-          if (i !== j) {
-            await omniFactories[i].setTrustedRemote(
-              chainIds[j],
-              hre.ethers.solidityPacked(
-                ['address', 'address'],
-                [omniFactoryAddresses[j], omniFactoryAddresses[i]],
-              ),
-            );
-          }
-        }
-      }
-      return {
-        chainIds,
-        lzEndpoints,
-        lzEndpointAddresses,
-        omniFactories,
-        omniFactoryAddresses,
-      };
-    };
-
-    type CoinDetailsRemoteConfig = {
-      remoteChainId: number;
-      receiver: string;
-      remoteSupplyAmount: string;
-      remoteFactoryAddress: string;
-    };
-    type CoinDetails = {
-      name: string;
-      symbol: string;
-      decimals: string;
-      totalSupply: string;
-      remoteConfigs: CoinDetailsRemoteConfig[];
-    };
-
-    const getEstimatedFees = async (
-      omniFactory: OmniFactory,
-      coinDetails: CoinDetails,
-    ) => {
-      const nativeFees = await omniFactory.estimateFee(
-        coinDetails.name,
-        coinDetails.symbol,
-        coinDetails.decimals,
-        coinDetails.totalSupply,
-        coinDetails.remoteConfigs.map((config) => ({
-          _remoteChainId: config.remoteChainId,
-          _receiver: config.receiver,
-          _remoteSupplyAmount: config.remoteSupplyAmount,
-          _remoteFactoryAddress: config.remoteFactoryAddress,
-        })),
-      );
-      const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
-
-      return { nativeFees, totalNativeFees };
-    };
-
-    const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
-      const [localCoinDeployedEvent] = await omniFactory.queryFilter(
-        omniFactory.filters.LocalCoinDeployed(),
-        'latest',
-      );
-      const [coinDeployedAddress, receiverAddress] =
-        localCoinDeployedEvent.args;
-      const coinDeployed = await hre.ethers.getContractAt(
-        'OmniCoin',
-        coinDeployedAddress,
-      );
-
-      return { coinDeployed, coinDeployedAddress, receiverAddress };
-    };
-
     it('should deploy coin on other remote chains', async () => {
       // ---------- arrange ---------- //
       // prepare the test environment
