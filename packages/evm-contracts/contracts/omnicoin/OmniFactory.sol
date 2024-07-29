@@ -5,7 +5,7 @@ import {ILayerZeroReceiver} from "@layerzerolabs/solidity-examples/contracts/lzA
 import {NonblockingLzApp} from "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {OmniCoin} from "./OmniCoin.sol";
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 enum CrossChainCommandId {
   DeployRemoteCoin,
@@ -84,6 +84,10 @@ contract OmniFactory is NonblockingLzApp {
         coinData._remoteConfig._receiver
       );
 
+      console.log("deploy succeed");
+      console.log("chainId", lzEndpoint.getChainId());
+      console.log("address(newCoin)", address(newCoin));
+
       _gossipNewCoin(
         _srcChainId,
         address(newCoin),
@@ -144,6 +148,10 @@ contract OmniFactory is NonblockingLzApp {
     // address _zroPaymentAddress,
     // bytes memory _adapterParams,
     // uint _nativeFee
+
+    console.log("gossip status???");
+
+    // TODO(dims): calculate native fee
     _lzSend(
       _srcChainId,
       payload,
@@ -152,6 +160,11 @@ contract OmniFactory is NonblockingLzApp {
       _getAdapterParams(),
       0
     );
+
+    console.log("gossip succeed");
+    console.log("chainId", lzEndpoint.getChainId());
+    // console.log("address(newCoin)", address(newCoin));
+
   }
 
   function deployLocalCoin(
