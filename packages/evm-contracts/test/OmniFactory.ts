@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import hre from 'hardhat';
 
-describe('OmniFactoryV3', () => {
+describe('OmniFactory', () => {
   describe('(deployment)', () => {
     it('should set the right layerzero endpoint', async () => {
       // ---------- arrange ---------- //
@@ -12,9 +12,8 @@ describe('OmniFactoryV3', () => {
       const lzEndpointAddress = await lzEndpoint.getAddress();
 
       // deploy the factory contract
-      const OmniFactoryV3 =
-        await hre.ethers.getContractFactory('OmniFactoryV3');
-      const factoryContract = await OmniFactoryV3.deploy(lzEndpointAddress);
+      const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
+      const factoryContract = await OmniFactory.deploy(lzEndpointAddress);
 
       // ---------- act ---------- //
       const actual = await factoryContract.lzEndpoint();
@@ -37,9 +36,8 @@ describe('OmniFactoryV3', () => {
       const lzEndpointAddress = await lzEndpoint.getAddress();
 
       // deploy the factory contract
-      const OmniFactoryV3 =
-        await hre.ethers.getContractFactory('OmniFactoryV3');
-      const factoryContract = await OmniFactoryV3.deploy(lzEndpointAddress);
+      const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
+      const factoryContract = await OmniFactory.deploy(lzEndpointAddress);
 
       // prepare the coin details
       const coinDetails = {
@@ -69,7 +67,7 @@ describe('OmniFactoryV3', () => {
 
       // connect to coin deployed contract
       const coinDeployed = await hre.ethers.getContractAt(
-        'OmniCoinV3',
+        'OmniCoin',
         coinDeployedAddress,
       );
 
@@ -102,10 +100,9 @@ describe('OmniFactoryV3', () => {
       const lzEndpointAddressB = await lzEndpointB.getAddress();
 
       // deploy the factory contract
-      const OmniFactoryV3 =
-        await hre.ethers.getContractFactory('OmniFactoryV3');
-      const factoryContractA = await OmniFactoryV3.deploy(lzEndpointAddressA);
-      const factoryContractB = await OmniFactoryV3.deploy(lzEndpointAddressB);
+      const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
+      const factoryContractA = await OmniFactory.deploy(lzEndpointAddressA);
+      const factoryContractB = await OmniFactory.deploy(lzEndpointAddressB);
       const factoryContractAddressA = await factoryContractA.getAddress();
       const factoryContractAddressB = await factoryContractB.getAddress();
 
@@ -188,7 +185,7 @@ describe('OmniFactoryV3', () => {
 
       // connect to coin deployed contract
       const coinDeployed = await hre.ethers.getContractAt(
-        'OmniCoinV3',
+        'OmniCoin',
         coinDeployedAddress,
       );
 

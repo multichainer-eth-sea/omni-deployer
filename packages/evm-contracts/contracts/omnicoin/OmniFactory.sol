@@ -4,7 +4,7 @@ import {ILayerZeroEndpoint} from "@layerzerolabs/solidity-examples/contracts/lzA
 import {ILayerZeroReceiver} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol";
 import {NonblockingLzApp} from "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {OmniCoinV3} from "./OmniCoinV3.sol";
+import {OmniCoin} from "./OmniCoin.sol";
 // import "hardhat/console.sol";
 
 enum CrossChainCommandId {
@@ -32,7 +32,7 @@ struct DeployRemoteCoinChainConfig {
   address _remoteFactoryAddress;
 }
 
-contract OmniFactoryV3 is NonblockingLzApp {
+contract OmniFactory is NonblockingLzApp {
   event LocalCoinDeployed(
     address indexed coinAddress,
     address indexed coinReceiver
@@ -81,7 +81,7 @@ contract OmniFactoryV3 is NonblockingLzApp {
   }
 
   // TODO(dims): implement this after multiple chain deployed implemented
-  function _gossipNewCoin(OmniCoinV3 _newCoin) internal {
+  function _gossipNewCoin(OmniCoin _newCoin) internal {
     // ...
   }
 
@@ -106,8 +106,8 @@ contract OmniFactoryV3 is NonblockingLzApp {
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
     address _receiver
-  ) internal returns (OmniCoinV3 newCoin) {
-    newCoin = new OmniCoinV3(
+  ) internal returns (OmniCoin newCoin) {
+    newCoin = new OmniCoin(
       _coinName,
       _coinTicker,
       _coinDecimals,
