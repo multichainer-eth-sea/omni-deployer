@@ -84,29 +84,7 @@ describe('OmniFactory', () => {
     });
   });
   describe('deployRemoteCoin()', () => {
-    const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
-      const [localCoinDeployedEvent] = await omniFactory.queryFilter(
-        omniFactory.filters.LocalCoinDeployed(),
-        'latest',
-      );
-      const [coinDeployedAddress, receiverAddress] =
-        localCoinDeployedEvent.args;
-      const coinDeployed = await hre.ethers.getContractAt(
-        'OmniCoin',
-        coinDeployedAddress,
-      );
-
-      return { coinDeployed, coinDeployedAddress, receiverAddress };
-    };
-
-    it('should deploy coin on other remote chains', async () => {
-      // ---------- arrange ---------- //
-      // prepare the chain id
-      const chainIds = [69, 420, 1337];
-
-      // prepare the owner
-      const [owner] = await hre.ethers.getSigners();
-
+    const prepareTestEnvironments = async (chainIds: number[]) => {
       // prepare the endpoints
       const LZEndpointMock =
         await hre.ethers.getContractFactory('LZEndpointMock');
@@ -157,6 +135,37 @@ describe('OmniFactory', () => {
           }
         }
       }
+      return {
+        chainIds,
+        lzEndpoints,
+        lzEndpointAddresses,
+        omniFactories,
+        omniFactoryAddresses,
+      };
+    };
+    const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
+      const [localCoinDeployedEvent] = await omniFactory.queryFilter(
+        omniFactory.filters.LocalCoinDeployed(),
+        'latest',
+      );
+      const [coinDeployedAddress, receiverAddress] =
+        localCoinDeployedEvent.args;
+      const coinDeployed = await hre.ethers.getContractAt(
+        'OmniCoin',
+        coinDeployedAddress,
+      );
+
+      return { coinDeployed, coinDeployedAddress, receiverAddress };
+    };
+
+    it('should deploy coin on other remote chains', async () => {
+      // ---------- arrange ---------- //
+      // prepare the test environment
+      const { chainIds, omniFactoryAddresses, omniFactories } =
+        await prepareTestEnvironments([69, 420, 1337]);
+
+      // prepare the owner
+      const [owner] = await hre.ethers.getSigners();
 
       // prepare the coin details
       const coinDetailsRemoteConfig = [
@@ -171,6 +180,7 @@ describe('OmniFactory', () => {
           remoteSupplyAmount: '250000000000000000000',
         },
       ];
+
       const coinDetails = {
         name: 'Omni Pepe',
         symbol: 'POPO',
@@ -232,12 +242,14 @@ describe('OmniFactory', () => {
       for (let i = 0; i < localCoinDeployedData.length; i++) {
         const { coinDeployedAddress, receiverAddress, coinDeployed } =
           localCoinDeployedData[i];
+
         const [name, symbol, decimals, totalSupply] = await Promise.all([
           coinDeployed.name(),
           coinDeployed.symbol(),
           coinDeployed.decimals(),
           coinDeployed.totalSupply(),
         ]);
+
         expect(coinDeployedAddress).to.not.be.empty;
         expect(receiverAddress).to.equal(owner.address);
         expect(name).to.equal(coinDetails.name);
@@ -246,6 +258,7 @@ describe('OmniFactory', () => {
         expect(totalSupply).to.equal(
           coinDetailsRemoteConfig[i].remoteSupplyAmount,
         );
+
         console.log({
           chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
           coinDeployedAddress,
