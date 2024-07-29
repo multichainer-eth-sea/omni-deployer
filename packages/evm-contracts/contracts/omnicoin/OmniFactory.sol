@@ -146,11 +146,10 @@ contract OmniFactory is NonblockingLzApp {
       });
       bytes memory deployBytes = abi.encode(deployData);
 
-      CrossChainCommand memory cmd = CrossChainCommand({
-        _commandId: CrossChainCommandId.DeployRemoteCoin,
-        _commandData: deployBytes
-      });
-      bytes memory payload = abi.encode(cmd);
+      bytes memory payload = _prepareCommandBytes(
+        CrossChainCommandId.DeployRemoteCoin,
+        deployBytes
+      );
 
       (uint256 nativeFee, ) = lzEndpoint.estimateFees(
         _remoteConfigs[0]._remoteChainId,
@@ -184,11 +183,10 @@ contract OmniFactory is NonblockingLzApp {
       });
       bytes memory deployBytes = abi.encode(deployData);
 
-      CrossChainCommand memory cmd = CrossChainCommand({
-        _commandId: CrossChainCommandId.DeployRemoteCoin,
-        _commandData: deployBytes
-      });
-      bytes memory payload = abi.encode(cmd);
+      bytes memory payload = _prepareCommandBytes(
+        CrossChainCommandId.DeployRemoteCoin,
+        deployBytes
+      );
 
       _lzSend(
         _remoteConfigs[i]._remoteChainId,
@@ -205,6 +203,17 @@ contract OmniFactory is NonblockingLzApp {
         _remoteConfigs[i]._remoteChainId
       );
     }
+  }
+
+  function _prepareCommandBytes(
+    CrossChainCommandId _commandId,
+    bytes memory _commandData
+  ) public pure returns (bytes memory cmdBytes) {
+    CrossChainCommand memory cmd = CrossChainCommand({
+      _commandId: _commandId,
+      _commandData: _commandData
+    });
+    cmdBytes = abi.encode(cmd);
   }
 
   function _getAdapterParams()
