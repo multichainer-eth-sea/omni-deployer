@@ -50,7 +50,7 @@ contract OmniFactory is NonblockingLzApp {
   ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
 
   function _nonblockingLzReceive(
-    uint16,
+    uint16 _srcChainId,
     bytes memory,
     uint64,
     bytes memory _payload
@@ -63,7 +63,7 @@ contract OmniFactory is NonblockingLzApp {
         (DeployRemoteCoin)
       );
 
-      _deployLocalCoin(
+      OmniCoin newCoin = _deployLocalCoin(
         coinData._coinName,
         coinData._coinTicker,
         coinData._coinDecimals,
@@ -71,7 +71,7 @@ contract OmniFactory is NonblockingLzApp {
         coinData._remoteConfigs._receiver
       );
 
-      // _gossipNewCoin(newCoin);
+      _gossipNewCoin(_srcChainId, address(newCoin), cmd._commandData);
       return;
     }
 
@@ -81,7 +81,11 @@ contract OmniFactory is NonblockingLzApp {
   }
 
   // TODO(dims): implement this after multiple chain deployed implemented
-  function _gossipNewCoin(OmniCoin _newCoin) internal {
+  function _gossipNewCoin(
+    uint16 _srcChainId,
+    address _deployedCoinAddress,
+    bytes memory _deployedCoinData
+  ) internal {
     // ...
   }
 
