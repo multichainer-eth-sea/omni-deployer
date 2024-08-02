@@ -1,0 +1,10 @@
+[package]
+name = "CrossChainToken"
+version = "0.0.1"
+authors = ["Your Name"]
+
+[addresses]
+my_addr = "0xf0e3ba8aa4132f29e965a5a3cffce6647c86bd3eeb98ea80cb3b2a0026ee262a"
+
+[dependencies]
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "mainnet" }
