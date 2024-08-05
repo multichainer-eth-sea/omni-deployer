@@ -15,7 +15,10 @@ export type CoinDetails = {
   remoteConfigs: CoinDetailsRemoteConfig[];
 };
 
-export const prepareTestEnvironments = async (chainIds: number[]) => {
+export const prepareTestEnvironments = async (
+  chainIds: number[],
+  enableGossip: boolean = false,
+) => {
   // prepare the endpoints
   const LZEndpointMock = await hre.ethers.getContractFactory('LZEndpointMock');
   const lzEndpoints = await Promise.all(
@@ -44,6 +47,7 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
           omniFactoryAddresses[j],
           lzEndpointAddresses[j],
         );
+        await omniFactories[i].setIsGossipEnabled(enableGossip);
       }
     }
   }
@@ -104,4 +108,26 @@ export const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
   );
 
   return { coinDeployed, coinDeployedAddress, receiverAddress };
+};
+
+export const getRemoteCoinGossipReceived = async (omniFactory: OmniFactory) => {
+  const [remoteCoinGossipReceivedEvent] = await omniFactory.queryFilter(
+    omniFactory.filters.RemoteCoinGossipReceived(),
+    'latest',
+  );
+  const [
+    coinAddress,
+    remoteChainId,
+    receiver,
+    remoteSupplyAmount,
+    remoteFactoryAddress,
+  ] = remoteCoinGossipReceivedEvent.args;
+
+  return {
+    coinAddress,
+    remoteChainId,
+    receiver,
+    remoteSupplyAmount,
+    remoteFactoryAddress,
+  };
 };
