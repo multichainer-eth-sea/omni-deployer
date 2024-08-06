@@ -2,7 +2,8 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { AptosWalletSelector } from "./aptos-wallet/aptos-wallet-selector";
 
 const links = [
   {
@@ -38,7 +39,8 @@ export function AppWrapper({ children }: React.PropsWithChildren) {
               ))}
             </nav>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            <AptosWalletSelector />
             <ConnectButton />
             {/* <nav className="flex items-center">
               <a href={"https://github.com/multichainer-eth-sea"}>

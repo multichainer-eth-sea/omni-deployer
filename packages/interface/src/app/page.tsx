@@ -7,7 +7,7 @@ export default function Home() {
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight lg:text-4xl">
           Create Token
         </h1>
-        <CreateTokenForm />{" "}
+        <CreateTokenForm />
       </div>
     </div>
   );

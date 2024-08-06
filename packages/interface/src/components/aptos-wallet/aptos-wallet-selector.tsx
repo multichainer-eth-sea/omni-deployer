@@ -23,26 +23,26 @@ import {
   User,
 } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "./ui/collapsible";
+} from "../ui/collapsible";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { useToast } from "./ui/use-toast";
+} from "../ui/dropdown-menu";
+import { useToast } from "../ui/use-toast";
 
 export function AptosWalletSelector(
   walletSortingOptions: WalletSortingOptions,
