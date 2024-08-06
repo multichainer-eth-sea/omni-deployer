@@ -1,6 +1,7 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const links = [
@@ -23,7 +24,7 @@ export function AppWrapper({ children }: React.PropsWithChildren) {
         <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
           <div className="flex items-center">
             <a className="mr-6 text-sm font-bold" href="/">
-              Omni-Deployer
+              <Image src="/logo.svg" alt="ETH SEA" width={35} height={35} />
             </a>
             <nav className="flex gap-4 text-sm">
               {links.map(({ href, label }) => (
