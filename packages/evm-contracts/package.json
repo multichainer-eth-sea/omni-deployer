@@ -6,7 +6,7 @@
     "deploy:coin": "hardhat deploy omnicoin",
     "deploy:factory": "hardhat deploy omnicoin-factory",
     "deploy:lz-v1": "hardhat deploy lz-v1",
-    "deploy:byte-playground": "hardhat deploy byte-playground",
+    "task:play": "hardhat play",
     "format": "prettier --write ."
   },
   "devDependencies": {
