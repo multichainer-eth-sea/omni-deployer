@@ -35,6 +35,7 @@ struct DeployRemoteCoinChainConfig {
 
 contract OmniFactory is NonblockingLzApp {
   event LocalCoinDeployed(
+    bytes32 indexed deploymentId,
     address indexed coinAddress,
     address indexed coinReceiver
   );
@@ -46,7 +47,7 @@ contract OmniFactory is NonblockingLzApp {
 
   uint256 internal constant gasForDestinationLzReceive = 3500000;
 
-  // mappings of deployment (bytes, chainId) to deployed coin address
+  // deployedCoins[bytes32(deploymentId)][uint16(srcChainId)] = address(coin)
   mapping(bytes => mapping(uint16 => bytes)) public deployedCoins;
 
   // mapping of user nonces
@@ -146,7 +147,7 @@ contract OmniFactory is NonblockingLzApp {
       _coinTotalSupply,
       _receiver
     );
-    emit LocalCoinDeployed(address(newCoin), _receiver);
+    emit LocalCoinDeployed(_deploymentId, address(newCoin), _receiver);
   }
 
   function estimateFee(
@@ -215,6 +216,8 @@ contract OmniFactory is NonblockingLzApp {
       lzEndpoint.getChainId(),
       chainIds
     );
+
+    userNonces[msg.sender] += 1;
 
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
       if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {
