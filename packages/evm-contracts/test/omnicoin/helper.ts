@@ -71,7 +71,7 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
   };
 };
 
-export const getEstimatedFees = async (
+export const getEstimatedDeployFees = async (
   omniFactory: OmniFactory,
   coinDetails: CoinDetails,
 ) => {
@@ -86,6 +86,20 @@ export const getEstimatedFees = async (
       _remoteSupplyAmount: config.remoteSupplyAmount,
       _remoteFactoryAddress: config.remoteFactoryAddress,
     })),
+  );
+  const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
+
+  return { nativeFees, totalNativeFees };
+};
+
+export const getEstimatedVerifyFees = async (
+  omniFactory: OmniFactory,
+  deploymentId: string,
+  chainIds: number[],
+) => {
+  const nativeFees = await omniFactory.estimateVerifyFee(
+    deploymentId,
+    chainIds,
   );
   const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 

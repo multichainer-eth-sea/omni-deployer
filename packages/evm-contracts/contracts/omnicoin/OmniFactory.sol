@@ -56,7 +56,7 @@ contract OmniFactory is NonblockingLzApp {
     uint16[] chainIds
   );
 
-  uint256 internal constant gasForDestinationLzReceive = 3500000;
+  uint256 internal constant gasForDestinationLzReceive = 20_000_000;
 
   // deployedCoins[bytes32(deploymentId)][uint16(chainId)] = address(coin)
   mapping(bytes32 => mapping(uint16 => bytes)) public deployedCoins;
@@ -126,7 +126,7 @@ contract OmniFactory is NonblockingLzApp {
     bytes32 _deploymentId,
     uint16[] memory _remoteChainIds,
     uint256[] memory _nativeFees
-  ) public {
+  ) public payable {
     bytes memory adapterParams = _getAdapterParams();
 
     VerifyRemoteCoinChainConfig[]

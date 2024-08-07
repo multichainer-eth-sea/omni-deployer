@@ -2,9 +2,10 @@ import { expect } from 'chai';
 import hre from 'hardhat';
 import {
   prepareTestEnvironments,
-  getEstimatedFees,
+  getEstimatedDeployFees,
   getLocalCoinDeployedAddress,
   CoinDetails,
+  getEstimatedVerifyFees,
 } from './helper';
 
 describe('OmniFactory', () => {
@@ -118,7 +119,7 @@ describe('OmniFactory', () => {
       };
 
       // get fees
-      const { nativeFees, totalNativeFees } = await getEstimatedFees(
+      const { nativeFees, totalNativeFees } = await getEstimatedDeployFees(
         omniFactories[0],
         coinDetails,
       );
@@ -155,16 +156,21 @@ describe('OmniFactory', () => {
       // ---------- assert ---------- //
       const { deploymentId: deploymentIdMain } = localCoinDeployedData[0];
       for (let i = 0; i < localCoinDeployedData.length; i++) {
-        const { deploymentId, coinDeployedAddress, receiverAddress, coinDeployed } =
-          localCoinDeployedData[i];
+        const {
+          deploymentId,
+          coinDeployedAddress,
+          receiverAddress,
+          coinDeployed,
+        } = localCoinDeployedData[i];
 
-        const [name, symbol, decimals, totalSupply, deploymentIdCoin] = await Promise.all([
-          coinDeployed.name(),
-          coinDeployed.symbol(),
-          coinDeployed.decimals(),
-          coinDeployed.totalSupply(),
-          coinDeployed.deploymentId(),
-        ]);
+        const [name, symbol, decimals, totalSupply, deploymentIdCoin] =
+          await Promise.all([
+            coinDeployed.name(),
+            coinDeployed.symbol(),
+            coinDeployed.decimals(),
+            coinDeployed.totalSupply(),
+            coinDeployed.deploymentId(),
+          ]);
 
         expect(coinDeployedAddress).to.not.be.empty;
         expect(receiverAddress).to.equal(owner.address);
@@ -182,7 +188,7 @@ describe('OmniFactory', () => {
           coinDeployedAddress,
           totalSupplyActual: totalSupply,
           totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
-          deploymentId
+          deploymentId,
         });
       }
     });
@@ -229,7 +235,7 @@ describe('OmniFactory', () => {
       };
 
       // get fees
-      const { nativeFees, totalNativeFees } = await getEstimatedFees(
+      const { nativeFees, totalNativeFees } = await getEstimatedDeployFees(
         omniFactories[0],
         coinDetails,
       );
@@ -292,9 +298,105 @@ describe('OmniFactory', () => {
         });
       }
     });
+  });
+  describe('verifyRemoteCoinDeployment()', () => {
+    it('should verify the deployment of remote coin', async () => {
+      // ---------- arrange ---------- //
+      // prepare the test environment
+      const { chainIds, omniFactoryAddresses, omniFactories } =
+        await prepareTestEnvironments([69, 420, 1337]);
 
-    it('should gossip back the deployment data to the entry point chain', async () => {
-      // need to tidy up the test so it uses DRY principle
+      // prepare the owner
+      const [owner] = await hre.ethers.getSigners();
+
+      // prepare the coin details
+      const coinDetailsRemoteConfig = [
+        {
+          chainIdIndex: 1,
+          receiverAddress: owner.address,
+          remoteSupplyAmount: '750000000000000000000',
+        },
+        {
+          chainIdIndex: 2,
+          receiverAddress: owner.address,
+          remoteSupplyAmount: '150000000000000000000',
+        },
+        {
+          chainIdIndex: 0,
+          receiverAddress: owner.address,
+          remoteSupplyAmount: '100000000000000000000',
+        },
+      ];
+
+      const coinDetails: CoinDetails = {
+        name: 'Omni Pepe',
+        symbol: 'POPO',
+        decimals: '18',
+        totalSupply: '1000000000000000000000',
+        remoteConfigs: coinDetailsRemoteConfig.map((rawConfig) => ({
+          remoteChainId: chainIds[rawConfig.chainIdIndex],
+          receiver: rawConfig.receiverAddress,
+          remoteSupplyAmount: rawConfig.remoteSupplyAmount,
+          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
+        })),
+      };
+
+      // get fees
+      const { nativeFees, totalNativeFees } = await getEstimatedDeployFees(
+        omniFactories[0],
+        coinDetails,
+      );
+
+      // run deployRemoteCoin()
+      await (
+        await omniFactories[0].deployRemoteCoin(
+          coinDetails.name,
+          coinDetails.symbol,
+          coinDetails.decimals,
+          coinDetails.totalSupply,
+          coinDetails.remoteConfigs.map((config) => ({
+            _remoteChainId: config.remoteChainId,
+            _receiver: config.receiver,
+            _remoteSupplyAmount: config.remoteSupplyAmount,
+            _remoteFactoryAddress: config.remoteFactoryAddress,
+          })),
+          nativeFees.map((fee) => fee.toString()),
+          { value: totalNativeFees },
+        )
+      ).wait();
+
+      // retreive the coin address deployed
+      const localCoinDeployedData = await Promise.all(
+        coinDetailsRemoteConfig.map(
+          async (config) =>
+            await getLocalCoinDeployedAddress(
+              omniFactories[config.chainIdIndex],
+            ),
+        ),
+      );
+
+      const deploymentId = localCoinDeployedData[0].deploymentId;
+
+      // ---------- act ---------- //
+      for (let i = 0; i < localCoinDeployedData.length; i++) {
+        const { nativeFees, totalNativeFees } = await getEstimatedVerifyFees(
+          omniFactories[i],
+          deploymentId,
+          chainIds,
+        );
+
+        // run verifyRemoteCoinDeployment()
+        const tx = await omniFactories[i].verifyRemoteCoinDeployment(
+          deploymentId,
+          chainIds,
+          nativeFees.map((fee) => fee.toString()),
+          { value: totalNativeFees },
+        );
+        await tx.wait();
+      }
+
+      // ---------- assert ---------- //
+
     });
   });
 });
