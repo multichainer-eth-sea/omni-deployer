@@ -405,36 +405,26 @@ describe('OmniFactory', () => {
           const { coinDeployedAddress, chainId: coinDeployedChainId } =
             localCoinDeployedData[remoteChainIdIndex];
           const omniFactoryChainId = await omniFactories[i].getChainId();
-          const coinAddressSavedInOmniFactory = await omniFactories[
-            i
-          ].deployedCoins(deploymentId, coinDeployedChainId);
+          const coinAddressSavedBytes = await omniFactories[i].deployedCoins(
+            deploymentId,
+            coinDeployedChainId,
+          );
+
+          const abiCoder = new hre.ethers.AbiCoder();
+          const [coinAddressSaved] = abiCoder.decode(
+            ['address'],
+            coinAddressSavedBytes,
+          );
 
           console.log({
             omniFactoryChainId,
             coinDeployedChainId,
             coinDeployedAddress,
-            coinAddressSavedInOmniFactory,
+            coinAddressSavedBytes,
+            coinAddressSaved,
           });
 
-          // expect(coinAddressInFactory).to.equal(coinDeployedAddress);
-
-          // const omniFactoryA = omniFactories[i];
-          // const omniFactoryB = omniFactories[j];
-
-          // const chainIdA = chainIds[i];
-          // const chainIdB = chainIds[j];
-
-          // const coinAddressInFactoryA = await omniFactoryA.deployedCoins(deploymentId, chainIdA);
-          // const coinAddressInFactoryB = await omniFactoryB.deployedCoins(deploymentId, chainIdB);
-
-          // console.log({
-          //   chainIdA,
-          //   chainIdB,
-          //   coinAddressInFactoryA,
-          //   coinAddressInFactoryB,
-          // });
-
-          // expect(coinAddressInFactoryA).to.equal(coinAddressInFactoryB);
+          expect(coinAddressSaved).to.equal(coinDeployedAddress);
         }
       }
     });
