@@ -40,14 +40,15 @@ contract OmniFactory is NonblockingLzApp {
     address indexed coinReceiver
   );
   event RemoteCoinDeployed(
-    address indexed remoteFactoryAddress,
+    bytes32 indexed deploymentId,
     address indexed creator,
-    uint16 indexed chainId
+    address[] remoteFactoryAddress,
+    uint16[] chainIds
   );
 
   uint256 internal constant gasForDestinationLzReceive = 3500000;
 
-  // deployedCoins[bytes32(deploymentId)][uint16(srcChainId)] = address(coin)
+  // deployedCoins[bytes32(deploymentId)][uint16(chainId)] = address(coin)
   mapping(bytes => mapping(uint16 => bytes)) public deployedCoins;
 
   // mapping of user nonces
@@ -208,8 +209,12 @@ contract OmniFactory is NonblockingLzApp {
     bytes memory adapterParams = _getAdapterParams();
 
     uint16[] memory chainIds = new uint16[](_remoteConfigs.length);
+    address[] memory remoteFactoryAddresses = new address[](
+      _remoteConfigs.length
+    );
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
       chainIds[i] = _remoteConfigs[i]._remoteChainId;
+      remoteFactoryAddresses[i] = _remoteConfigs[i]._remoteFactoryAddress;
     }
     bytes32 deploymentId = _generateDeploymentId(
       msg.sender,
@@ -253,14 +258,14 @@ contract OmniFactory is NonblockingLzApp {
           adapterParams,
           nativeFees[i]
         );
-
-        emit RemoteCoinDeployed(
-          _remoteConfigs[i]._remoteFactoryAddress,
-          msg.sender,
-          _remoteConfigs[i]._remoteChainId
-        );
       }
     }
+    emit RemoteCoinDeployed(
+      deploymentId,
+      msg.sender,
+      remoteFactoryAddresses,
+      chainIds
+    );
   }
 
   function _prepareCommandBytes(
