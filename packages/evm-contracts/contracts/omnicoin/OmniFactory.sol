@@ -82,7 +82,7 @@ contract OmniFactory is NonblockingLzApp {
         (DeployRemoteCoin)
       );
 
-      OmniCoin newCoin = _deployLocalCoin(
+      _deployLocalCoin(
         coinData._deploymentId,
         coinData._coinName,
         coinData._coinTicker,
@@ -90,23 +90,11 @@ contract OmniFactory is NonblockingLzApp {
         coinData._remoteConfig._remoteSupplyAmount,
         coinData._remoteConfig._receiver
       );
-
-      _gossipNewCoin(_srcChainId, address(newCoin), cmd._commandData);
-      return;
     }
 
     if (cmd._commandId == CrossChainCommandId.GossipRemoteCoin) {
       // ...
     }
-  }
-
-  // TODO(dims): implement this after multiple chain deployed implemented
-  function _gossipNewCoin(
-    uint16 _srcChainId,
-    address _deployedCoinAddress,
-    bytes memory _deployedCoinData
-  ) internal {
-    // ...
   }
 
   function deployLocalCoin(
