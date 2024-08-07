@@ -68,7 +68,7 @@ contract OmniFactory is NonblockingLzApp {
 
   constructor(
     address _endpoint
-  ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
+  ) NonblockingLzApp(_endpoint) {}
 
   function _generateDeploymentId(
     address _userAddress,

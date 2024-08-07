@@ -42,7 +42,7 @@ contract GasDrop is NonblockingLzApp {
 
   constructor(
     address _endpoint
-  ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
+  ) NonblockingLzApp(_endpoint) {}
 
   function _nonblockingLzReceive(
     uint16 /* _srcChainId */,
