@@ -94,8 +94,12 @@ scope('play')
     );
     const receipt = await tx.wait();
 
-    console.log(`Ethers sent to ${addressSent} on chain ${taskArgs.dstChainId}`);
-    console.log(`Total ethers sent: ${hre.ethers.formatEther(totalEthersSent)}`);
+    console.log(
+      `Ethers sent to ${addressSent} on chain ${taskArgs.dstChainId}`,
+    );
+    console.log(
+      `Total ethers sent: ${hre.ethers.formatEther(totalEthersSent)}`,
+    );
     console.log(`https://layerzeroscan.com/tx/${receipt?.hash}`);
   });
 

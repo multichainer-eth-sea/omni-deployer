@@ -168,10 +168,10 @@ contract GasDrop is NonblockingLzApp {
 
   // allow this contract to receive ether
   receive() external payable {
-      emit EtherReceivedViaReceiveFunction(msg.value);
+    emit EtherReceivedViaReceiveFunction(msg.value);
   }
 
   fallback() external payable {
-      emit EtherReceivedViaFallbackFunction(msg.value);
+    emit EtherReceivedViaFallbackFunction(msg.value);
   }
 }

@@ -71,11 +71,11 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
   };
 };
 
-export const getEstimatedFees = async (
+export const getEstimatedDeployFees = async (
   omniFactory: OmniFactory,
   coinDetails: CoinDetails,
 ) => {
-  const nativeFees = await omniFactory.estimateFee(
+  const nativeFees = await omniFactory.estimateDeployFee(
     coinDetails.name,
     coinDetails.symbol,
     coinDetails.decimals,
@@ -92,16 +92,39 @@ export const getEstimatedFees = async (
   return { nativeFees, totalNativeFees };
 };
 
+export const getEstimatedVerifyFees = async (
+  omniFactory: OmniFactory,
+  deploymentId: string,
+  chainIds: number[],
+) => {
+  const nativeFees = await omniFactory.estimateVerifyFee(
+    deploymentId,
+    chainIds,
+  );
+  const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
+
+  return { nativeFees, totalNativeFees };
+};
+
 export const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
   const [localCoinDeployedEvent] = await omniFactory.queryFilter(
     omniFactory.filters.LocalCoinDeployed(),
     'latest',
   );
-  const [coinDeployedAddress, receiverAddress] = localCoinDeployedEvent.args;
+  const [deploymentId, coinDeployedAddress, receiverAddress] =
+    localCoinDeployedEvent.args;
   const coinDeployed = await hre.ethers.getContractAt(
     'OmniCoin',
     coinDeployedAddress,
   );
 
-  return { coinDeployed, coinDeployedAddress, receiverAddress };
+  const chainId = await omniFactory.getChainId();
+
+  return {
+    chainId,
+    deploymentId,
+    coinDeployed,
+    coinDeployedAddress,
+    receiverAddress,
+  };
 };
