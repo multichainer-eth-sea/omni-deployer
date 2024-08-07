@@ -199,7 +199,8 @@ contract OmniFactory is NonblockingLzApp {
       _coinTicker,
       _coinDecimals,
       _coinTotalSupply,
-      _receiver
+      _receiver,
+      address(lzEndpoint)
     );
     _setCoinDeployedAddress(
       _deploymentId,
