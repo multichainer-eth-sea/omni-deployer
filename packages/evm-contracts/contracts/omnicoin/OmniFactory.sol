@@ -9,7 +9,7 @@ import {OmniCoin} from "./OmniCoin.sol";
 
 enum CrossChainCommandId {
   DeployRemoteCoin,
-  GossipRemoteCoin
+  VerifyRemoteCoin
 }
 
 struct CrossChainCommand {
@@ -33,6 +33,16 @@ struct DeployRemoteCoinChainConfig {
   address _remoteFactoryAddress;
 }
 
+struct VerifyRemoteCoin {
+  bytes32 _deploymentId;
+  VerifyRemoteCoinChainConfig[] _remoteConfigs;
+}
+
+struct VerifyRemoteCoinChainConfig {
+  uint16 _chainId;
+  bytes _deployedCoinAddress;
+}
+
 contract OmniFactory is NonblockingLzApp {
   event LocalCoinDeployed(
     bytes32 indexed deploymentId,
@@ -49,7 +59,7 @@ contract OmniFactory is NonblockingLzApp {
   uint256 internal constant gasForDestinationLzReceive = 3500000;
 
   // deployedCoins[bytes32(deploymentId)][uint16(chainId)] = address(coin)
-  mapping(bytes => mapping(uint16 => bytes)) public deployedCoins;
+  mapping(bytes32 => mapping(uint16 => bytes)) public deployedCoins;
 
   // mapping of user nonces
   mapping(address => uint256) public userNonces;
@@ -69,7 +79,7 @@ contract OmniFactory is NonblockingLzApp {
   }
 
   function _nonblockingLzReceive(
-    uint16 _srcChainId,
+    uint16,
     bytes memory,
     uint64,
     bytes memory _payload
@@ -90,10 +100,66 @@ contract OmniFactory is NonblockingLzApp {
         coinData._remoteConfig._remoteSupplyAmount,
         coinData._remoteConfig._receiver
       );
+
+      return;
     }
 
-    if (cmd._commandId == CrossChainCommandId.GossipRemoteCoin) {
-      // ...
+    if (cmd._commandId == CrossChainCommandId.VerifyRemoteCoin) {
+      VerifyRemoteCoin memory verifyData = abi.decode(
+        cmd._commandData,
+        (VerifyRemoteCoin)
+      );
+
+      for (uint256 i = 0; i < verifyData._remoteConfigs.length; i++) {
+        deployedCoins[verifyData._deploymentId][
+          verifyData._remoteConfigs[i]._chainId
+        ] = verifyData._remoteConfigs[i]._deployedCoinAddress;
+      }
+
+      // do set trusted remote
+
+      return;
+    }
+  }
+
+  function verifyRemoteCoinDeployment(
+    bytes32 _deploymentId,
+    uint16[] memory _remoteChainIds,
+    uint256[] memory _nativeFees
+  ) public {
+    bytes memory adapterParams = _getAdapterParams();
+
+    VerifyRemoteCoinChainConfig[]
+      memory remoteConfigs = new VerifyRemoteCoinChainConfig[](
+        _remoteChainIds.length
+      );
+
+    for (uint256 i = 0; i < _remoteChainIds.length; i++) {
+      if (_remoteChainIds[i] != lzEndpoint.getChainId()) {
+        remoteConfigs[i] = VerifyRemoteCoinChainConfig({
+          _chainId: _remoteChainIds[i],
+          _deployedCoinAddress: deployedCoins[_deploymentId][_remoteChainIds[i]]
+        });
+        VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
+          _deploymentId: _deploymentId,
+          _remoteConfigs: remoteConfigs
+        });
+        bytes memory verifyBytes = abi.encode(verifyData);
+
+        bytes memory payload = _prepareCommandBytes(
+          CrossChainCommandId.VerifyRemoteCoin,
+          verifyBytes
+        );
+
+        _lzSend(
+          _remoteChainIds[i],
+          payload,
+          payable(msg.sender),
+          address(0x0),
+          adapterParams,
+          _nativeFees[i]
+        );
+      }
     }
   }
 
@@ -139,7 +205,7 @@ contract OmniFactory is NonblockingLzApp {
     emit LocalCoinDeployed(_deploymentId, address(newCoin), _receiver);
   }
 
-  function estimateFee(
+  function estimateDeployFee(
     string memory _coinName,
     string memory _coinTicker,
     uint8 _coinDecimals,
@@ -186,13 +252,58 @@ contract OmniFactory is NonblockingLzApp {
     }
   }
 
+  function estimateVerifyFee(
+    bytes32 _deploymentId,
+    uint16[] memory _remoteChainIds
+  ) public view returns (uint256[] memory nativeFees) {
+    nativeFees = new uint256[](_remoteChainIds.length);
+
+    bytes memory adapterParams = _getAdapterParams();
+
+    VerifyRemoteCoinChainConfig[]
+      memory remoteConfigs = new VerifyRemoteCoinChainConfig[](
+        _remoteChainIds.length
+      );
+
+    for (uint256 i = 0; i < _remoteChainIds.length; i++) {
+      if (_remoteChainIds[i] == lzEndpoint.getChainId()) {
+        nativeFees[i] = 0;
+      } else {
+        remoteConfigs[i] = VerifyRemoteCoinChainConfig({
+          _chainId: _remoteChainIds[i],
+          _deployedCoinAddress: deployedCoins[_deploymentId][_remoteChainIds[i]]
+        });
+        VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
+          _deploymentId: _deploymentId,
+          _remoteConfigs: remoteConfigs
+        });
+        bytes memory verifyBytes = abi.encode(verifyData);
+
+        bytes memory payload = _prepareCommandBytes(
+          CrossChainCommandId.VerifyRemoteCoin,
+          verifyBytes
+        );
+
+        (uint256 nativeFee, ) = lzEndpoint.estimateFees(
+          _remoteChainIds[i],
+          address(this),
+          payload,
+          false,
+          adapterParams
+        );
+
+        nativeFees[i] = nativeFee;
+      }
+    }
+  }
+
   function deployRemoteCoin(
     string memory _coinName,
     string memory _coinTicker,
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
     DeployRemoteCoinChainConfig[] memory _remoteConfigs,
-    uint256[] memory nativeFees
+    uint256[] memory _nativeFees
   ) public payable {
     bytes memory adapterParams = _getAdapterParams();
 
@@ -244,7 +355,7 @@ contract OmniFactory is NonblockingLzApp {
           payable(msg.sender),
           address(0x0),
           adapterParams,
-          nativeFees[i]
+          _nativeFees[i]
         );
       }
     }
