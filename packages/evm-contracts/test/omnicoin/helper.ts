@@ -118,5 +118,13 @@ export const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
     coinDeployedAddress,
   );
 
-  return { deploymentId, coinDeployed, coinDeployedAddress, receiverAddress };
+  const chainId = await omniFactory.getChainId();
+
+  return {
+    chainId,
+    deploymentId,
+    coinDeployed,
+    coinDeployedAddress,
+    receiverAddress,
+  };
 };

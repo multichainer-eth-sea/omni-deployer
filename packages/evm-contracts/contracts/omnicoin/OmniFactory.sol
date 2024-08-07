@@ -35,10 +35,6 @@ struct DeployRemoteCoinChainConfig {
 
 struct VerifyRemoteCoin {
   bytes32 _deploymentId;
-  VerifyRemoteCoinChainConfig[] _remoteConfigs;
-}
-
-struct VerifyRemoteCoinChainConfig {
   uint16 _chainId;
   bytes _deployedCoinAddress;
 }
@@ -50,6 +46,12 @@ contract OmniFactory is NonblockingLzApp {
     address indexed coinReceiver
   );
   event RemoteCoinDeployed(
+    bytes32 indexed deploymentId,
+    address indexed creator,
+    address[] remoteFactoryAddress,
+    uint16[] chainIds
+  );
+  event RemoteCoinVerified(
     bytes32 indexed deploymentId,
     address indexed creator,
     address[] remoteFactoryAddress,
@@ -76,6 +78,10 @@ contract OmniFactory is NonblockingLzApp {
     uint256 nonce = userNonces[_userAddress];
     return
       keccak256(abi.encodePacked(_userAddress, _srcChainId, _chainIds, nonce));
+  }
+
+  function getChainId() public view returns (uint16) {
+    return lzEndpoint.getChainId();
   }
 
   function _nonblockingLzReceive(
@@ -110,11 +116,11 @@ contract OmniFactory is NonblockingLzApp {
         (VerifyRemoteCoin)
       );
 
-      for (uint256 i = 0; i < verifyData._remoteConfigs.length; i++) {
-        deployedCoins[verifyData._deploymentId][
-          verifyData._remoteConfigs[i]._chainId
-        ] = verifyData._remoteConfigs[i]._deployedCoinAddress;
-      }
+      _setCoinDeployedAddress(
+        verifyData._deploymentId,
+        verifyData._chainId,
+        verifyData._deployedCoinAddress
+      );
 
       // do set trusted remote
 
@@ -128,21 +134,14 @@ contract OmniFactory is NonblockingLzApp {
     uint256[] memory _nativeFees
   ) public payable {
     bytes memory adapterParams = _getAdapterParams();
-
-    VerifyRemoteCoinChainConfig[]
-      memory remoteConfigs = new VerifyRemoteCoinChainConfig[](
-        _remoteChainIds.length
-      );
+    uint16 currentChainId = lzEndpoint.getChainId();
 
     for (uint256 i = 0; i < _remoteChainIds.length; i++) {
-      if (_remoteChainIds[i] != lzEndpoint.getChainId()) {
-        remoteConfigs[i] = VerifyRemoteCoinChainConfig({
-          _chainId: _remoteChainIds[i],
-          _deployedCoinAddress: deployedCoins[_deploymentId][_remoteChainIds[i]]
-        });
+      if (_remoteChainIds[i] != currentChainId) {
         VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
           _deploymentId: _deploymentId,
-          _remoteConfigs: remoteConfigs
+          _chainId: currentChainId,
+          _deployedCoinAddress: deployedCoins[_deploymentId][currentChainId]
         });
         bytes memory verifyBytes = abi.encode(verifyData);
 
@@ -202,7 +201,20 @@ contract OmniFactory is NonblockingLzApp {
       _coinTotalSupply,
       _receiver
     );
+    _setCoinDeployedAddress(
+      _deploymentId,
+      lzEndpoint.getChainId(),
+      abi.encode(address(newCoin))
+    );
     emit LocalCoinDeployed(_deploymentId, address(newCoin), _receiver);
+  }
+
+  function _setCoinDeployedAddress(
+    bytes32 _deploymentId,
+    uint16 _chainId,
+    bytes memory _coinAddress
+  ) internal {
+    deployedCoins[_deploymentId][_chainId] = _coinAddress;
   }
 
   function estimateDeployFee(
@@ -259,23 +271,16 @@ contract OmniFactory is NonblockingLzApp {
     nativeFees = new uint256[](_remoteChainIds.length);
 
     bytes memory adapterParams = _getAdapterParams();
-
-    VerifyRemoteCoinChainConfig[]
-      memory remoteConfigs = new VerifyRemoteCoinChainConfig[](
-        _remoteChainIds.length
-      );
+    uint16 currentChainId = lzEndpoint.getChainId();
 
     for (uint256 i = 0; i < _remoteChainIds.length; i++) {
       if (_remoteChainIds[i] == lzEndpoint.getChainId()) {
         nativeFees[i] = 0;
       } else {
-        remoteConfigs[i] = VerifyRemoteCoinChainConfig({
-          _chainId: _remoteChainIds[i],
-          _deployedCoinAddress: deployedCoins[_deploymentId][_remoteChainIds[i]]
-        });
         VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
           _deploymentId: _deploymentId,
-          _remoteConfigs: remoteConfigs
+          _chainId: currentChainId,
+          _deployedCoinAddress: deployedCoins[_deploymentId][currentChainId]
         });
         bytes memory verifyBytes = abi.encode(verifyData);
 

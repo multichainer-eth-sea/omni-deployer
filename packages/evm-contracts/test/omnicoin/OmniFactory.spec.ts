@@ -396,7 +396,47 @@ describe('OmniFactory', () => {
       }
 
       // ---------- assert ---------- //
+      console.log(coinDetails);
+      console.log('deploying from chainId:', chainIds[0]);
+      for (let i = 0; i < chainIds.length; i++) {
+        console.log('====================================');
+        for (let j = 0; j < coinDetailsRemoteConfig.length; j++) {
+          const remoteChainIdIndex = coinDetailsRemoteConfig[j].chainIdIndex;
+          const { coinDeployedAddress, chainId: coinDeployedChainId } =
+            localCoinDeployedData[remoteChainIdIndex];
+          const omniFactoryChainId = await omniFactories[i].getChainId();
+          const coinAddressSavedInOmniFactory = await omniFactories[
+            i
+          ].deployedCoins(deploymentId, coinDeployedChainId);
 
+          console.log({
+            omniFactoryChainId,
+            coinDeployedChainId,
+            coinDeployedAddress,
+            coinAddressSavedInOmniFactory,
+          });
+
+          // expect(coinAddressInFactory).to.equal(coinDeployedAddress);
+
+          // const omniFactoryA = omniFactories[i];
+          // const omniFactoryB = omniFactories[j];
+
+          // const chainIdA = chainIds[i];
+          // const chainIdB = chainIds[j];
+
+          // const coinAddressInFactoryA = await omniFactoryA.deployedCoins(deploymentId, chainIdA);
+          // const coinAddressInFactoryB = await omniFactoryB.deployedCoins(deploymentId, chainIdB);
+
+          // console.log({
+          //   chainIdA,
+          //   chainIdB,
+          //   coinAddressInFactoryA,
+          //   coinAddressInFactoryB,
+          // });
+
+          // expect(coinAddressInFactoryA).to.equal(coinAddressInFactoryB);
+        }
+      }
     });
   });
 });
