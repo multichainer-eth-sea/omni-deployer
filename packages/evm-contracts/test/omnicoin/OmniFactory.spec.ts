@@ -153,15 +153,17 @@ describe('OmniFactory', () => {
       );
 
       // ---------- assert ---------- //
+      const { deploymentId: deploymentIdMain } = localCoinDeployedData[0];
       for (let i = 0; i < localCoinDeployedData.length; i++) {
-        const { coinDeployedAddress, receiverAddress, coinDeployed } =
+        const { deploymentId, coinDeployedAddress, receiverAddress, coinDeployed } =
           localCoinDeployedData[i];
 
-        const [name, symbol, decimals, totalSupply] = await Promise.all([
+        const [name, symbol, decimals, totalSupply, deploymentIdCoin] = await Promise.all([
           coinDeployed.name(),
           coinDeployed.symbol(),
           coinDeployed.decimals(),
           coinDeployed.totalSupply(),
+          coinDeployed.deploymentId(),
         ]);
 
         expect(coinDeployedAddress).to.not.be.empty;
@@ -172,12 +174,15 @@ describe('OmniFactory', () => {
         expect(totalSupply).to.equal(
           coinDetailsRemoteConfig[i].remoteSupplyAmount,
         );
+        expect(deploymentIdCoin).to.equal(deploymentIdMain);
+        expect(deploymentId).to.equal(deploymentIdMain);
 
         console.log({
           chainId: chainIds[coinDetailsRemoteConfig[i].chainIdIndex],
           coinDeployedAddress,
           totalSupplyActual: totalSupply,
           totalSupplyExpected: coinDetailsRemoteConfig[i].remoteSupplyAmount,
+          deploymentId
         });
       }
     });

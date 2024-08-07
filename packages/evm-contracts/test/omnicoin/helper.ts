@@ -75,7 +75,7 @@ export const getEstimatedFees = async (
   omniFactory: OmniFactory,
   coinDetails: CoinDetails,
 ) => {
-  const nativeFees = await omniFactory.estimateFee(
+  const nativeFees = await omniFactory.estimateDeployFee(
     coinDetails.name,
     coinDetails.symbol,
     coinDetails.decimals,
@@ -97,11 +97,12 @@ export const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
     omniFactory.filters.LocalCoinDeployed(),
     'latest',
   );
-  const [coinDeployedAddress, receiverAddress] = localCoinDeployedEvent.args;
+  const [deploymentId, coinDeployedAddress, receiverAddress] =
+    localCoinDeployedEvent.args;
   const coinDeployed = await hre.ethers.getContractAt(
     'OmniCoin',
     coinDeployedAddress,
   );
 
-  return { coinDeployed, coinDeployedAddress, receiverAddress };
+  return { deploymentId, coinDeployed, coinDeployedAddress, receiverAddress };
 };
