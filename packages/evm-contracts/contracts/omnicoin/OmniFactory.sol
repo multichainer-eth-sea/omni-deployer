@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
-import {ILayerZeroEndpoint} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroEndpoint.sol";
 import {ILayerZeroReceiver} from "@layerzerolabs/solidity-examples/contracts/lzApp/interfaces/ILayerZeroReceiver.sol";
 import {NonblockingLzApp} from "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -66,9 +65,7 @@ contract OmniFactory is NonblockingLzApp {
   // mapping of user nonces
   mapping(address => uint256) public userNonces;
 
-  constructor(
-    address _endpoint
-  ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
+  constructor(address _endpoint) NonblockingLzApp(_endpoint) {}
 
   function _generateDeploymentId(
     address _userAddress,
@@ -122,10 +119,37 @@ contract OmniFactory is NonblockingLzApp {
         verifyData._deployedCoinAddress
       );
 
-      // do set trusted remote
+      _setOmniCoinTrustedRemote(verifyData._deploymentId, verifyData._chainId);
 
       return;
     }
+  }
+
+  function getRemoteCoinAddress(
+    bytes32 _deploymentId,
+    uint16 _chainId
+  ) public view returns (bytes memory) {
+    return deployedCoins[_deploymentId][_chainId];
+  }
+
+  function _setOmniCoinTrustedRemote(
+    bytes32 _deploymentId,
+    uint16 _remoteChainId
+  ) internal {
+    address remoteCoinAddress = abi.decode(
+      deployedCoins[_deploymentId][_remoteChainId],
+      (address)
+    );
+    address localCoinAddress = abi.decode(
+      deployedCoins[_deploymentId][lzEndpoint.getChainId()],
+      (address)
+    );
+    OmniCoin(payable(localCoinAddress)).setTrustedRemoteAddress(
+      _remoteChainId,
+      abi.encodePacked(remoteCoinAddress)
+    );
+    OmniCoin(payable(localCoinAddress)).setMinDstGas(_remoteChainId, 0, 200000);
+    OmniCoin(payable(localCoinAddress)).setMinDstGas(_remoteChainId, 1, 200000);
   }
 
   function verifyRemoteCoinDeployment(
@@ -199,13 +223,15 @@ contract OmniFactory is NonblockingLzApp {
       _coinTicker,
       _coinDecimals,
       _coinTotalSupply,
-      _receiver
+      _receiver,
+      address(lzEndpoint)
     );
     _setCoinDeployedAddress(
       _deploymentId,
       lzEndpoint.getChainId(),
       abi.encode(address(newCoin))
     );
+    // _setOmniCoinTrustedRemote(_deploymentId, lzEndpoint.getChainId());
     emit LocalCoinDeployed(_deploymentId, address(newCoin), _receiver);
   }
 

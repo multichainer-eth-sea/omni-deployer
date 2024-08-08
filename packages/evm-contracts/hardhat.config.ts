@@ -28,6 +28,9 @@ const config: HardhatUserConfig = {
       url: 'https://mainnet.base.org',
       accounts: [envConfig.DEPLOYER_PRIVATE_KEY],
     },
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
   },
   etherscan: {
     apiKey: {

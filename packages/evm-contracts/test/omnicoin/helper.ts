@@ -1,5 +1,5 @@
 import hre from 'hardhat';
-import { OmniFactory } from '../../typechain-types';
+import { OmniCoin, OmniFactory } from '../../typechain-types';
 
 export type CoinDetailsRemoteConfig = {
   remoteChainId: number;
@@ -127,4 +127,15 @@ export const getLocalCoinDeployedAddress = async (omniFactory: OmniFactory) => {
     coinDeployedAddress,
     receiverAddress,
   };
+};
+
+export const getOmniCoinTransferEvents = async (coin: OmniCoin) => {
+  const transferEvents = await coin.queryFilter(coin.filters.Transfer());
+  return transferEvents.map((event) => ({
+    address: event.address,
+    eventName: 'Transfer',
+    from: event.args[0],
+    to: event.args[1],
+    value: event.args[2],
+  }));
 };
