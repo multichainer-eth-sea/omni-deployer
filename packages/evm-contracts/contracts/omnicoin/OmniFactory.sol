@@ -144,8 +144,12 @@ contract OmniFactory is NonblockingLzApp {
       deployedCoins[_deploymentId][lzEndpoint.getChainId()],
       (address)
     );
-    bytes memory path = abi.encodePacked(remoteCoinAddress, localCoinAddress);
-    OmniCoin(payable(localCoinAddress)).setTrustedRemote(_remoteChainId, path);
+    OmniCoin(payable(localCoinAddress)).setTrustedRemoteAddress(
+      _remoteChainId,
+      abi.encodePacked(remoteCoinAddress)
+    );
+    OmniCoin(payable(localCoinAddress)).setMinDstGas(_remoteChainId, 0, 200000);
+    OmniCoin(payable(localCoinAddress)).setMinDstGas(_remoteChainId, 1, 200000);
   }
 
   function verifyRemoteCoinDeployment(
@@ -227,6 +231,7 @@ contract OmniFactory is NonblockingLzApp {
       lzEndpoint.getChainId(),
       abi.encode(address(newCoin))
     );
+    // _setOmniCoinTrustedRemote(_deploymentId, lzEndpoint.getChainId());
     emit LocalCoinDeployed(_deploymentId, address(newCoin), _receiver);
   }
 

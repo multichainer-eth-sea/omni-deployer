@@ -29,8 +29,8 @@ const config: HardhatUserConfig = {
       accounts: [envConfig.DEPLOYER_PRIVATE_KEY],
     },
     hardhat: {
-      allowUnlimitedContractSize: true
-    }
+      allowUnlimitedContractSize: true,
+    },
   },
   etherscan: {
     apiKey: {
