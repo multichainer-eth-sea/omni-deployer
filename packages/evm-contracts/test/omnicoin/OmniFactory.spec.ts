@@ -30,57 +30,6 @@ describe('OmniFactory', () => {
     });
   });
 
-  describe('deployLocalCoin()', () => {
-    it('should deploy coin on local chain', async () => {
-      // ---------- arrange ---------- //
-      // prepare the owner
-      const [owner] = await hre.ethers.getSigners();
-
-      // prepare the endpoints
-      const LZEndpointMock =
-        await hre.ethers.getContractFactory('LZEndpointMock');
-      const lzEndpoint = await LZEndpointMock.deploy(1);
-      const lzEndpointAddress = await lzEndpoint.getAddress();
-
-      // deploy the factory contract
-      const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
-      const omniFactory = await OmniFactory.deploy(lzEndpointAddress);
-
-      // prepare the coin details
-      const coinDetails = {
-        name: 'Omni Pepe',
-        symbol: 'POPO',
-        decimals: '18',
-        totalSupply: '1000000000000000000000',
-      };
-
-      // ---------- act ---------- //
-      // run deployLocalCoin()
-      await (
-        await omniFactory.deployLocalCoin(
-          coinDetails.name,
-          coinDetails.symbol,
-          coinDetails.decimals,
-          coinDetails.totalSupply,
-        )
-      ).wait();
-
-      // retreive the coin address deployed
-      const { coinDeployedAddress, receiverAddress, coinDeployed } =
-        await getLocalCoinDeployedAddress(omniFactory);
-
-      // ---------- assert ---------- //
-      expect(coinDeployedAddress).to.not.be.empty;
-      expect(receiverAddress).to.equal(owner.address);
-      expect(await coinDeployed.name()).to.equal(coinDetails.name);
-      expect(await coinDeployed.symbol()).to.equal(coinDetails.symbol);
-      expect(await coinDeployed.decimals()).to.equal(coinDetails.decimals);
-      expect(await coinDeployed.totalSupply()).to.equal(
-        coinDetails.totalSupply,
-      );
-    });
-  });
-
   describe('deployRemoteCoin()', () => {
     it('should deploy coin on other remote chains', async () => {
       // ---------- arrange ---------- //

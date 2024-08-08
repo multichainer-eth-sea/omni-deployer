@@ -125,13 +125,6 @@ contract OmniFactory is NonblockingLzApp {
     }
   }
 
-  function getRemoteCoinAddress(
-    bytes32 _deploymentId,
-    uint16 _chainId
-  ) public view returns (bytes memory) {
-    return deployedCoins[_deploymentId][_chainId];
-  }
-
   function _setOmniCoinTrustedRemote(
     bytes32 _deploymentId,
     uint16 _remoteChainId
@@ -184,29 +177,6 @@ contract OmniFactory is NonblockingLzApp {
         );
       }
     }
-  }
-
-  function deployLocalCoin(
-    string memory _coinName,
-    string memory _coinTicker,
-    uint8 _coinDecimals,
-    uint256 _coinTotalSupply
-  ) public {
-    uint16[] memory chainIds = new uint16[](1);
-    chainIds[0] = lzEndpoint.getChainId();
-    bytes32 deploymentId = _generateDeploymentId(
-      msg.sender,
-      lzEndpoint.getChainId(),
-      chainIds
-    );
-    _deployLocalCoin(
-      deploymentId,
-      _coinName,
-      _coinTicker,
-      _coinDecimals,
-      _coinTotalSupply,
-      msg.sender
-    );
   }
 
   function _deployLocalCoin(
