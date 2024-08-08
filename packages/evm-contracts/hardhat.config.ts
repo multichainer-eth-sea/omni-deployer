@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
 import '@nomicfoundation/hardhat-verify';
+import 'hardhat-contract-sizer';
 import { config as envConfig } from './utils';
 
 import './tasks';
@@ -11,9 +12,15 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
+        runs: 200,
       },
     },
+  },
+  contractSizer: {
+    alphaSort: false,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
   },
   networks: {
     arbitrumOne: {
