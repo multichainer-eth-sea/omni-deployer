@@ -1,9 +1,7 @@
 import { scope } from 'hardhat/config';
 
-const deployTask = scope('deploy');
-
-deployTask
-  .task('byte-playground', 'Deploys the BytePlayground contract')
+scope('play')
+  .task('byte-test-deploy', 'Deploys the BytePlayground contract')
   .setAction(async (_, hre) => {
     const ContractInit = await hre.ethers.getContractFactory('BytePlayground');
     const contract = await ContractInit.deploy();
