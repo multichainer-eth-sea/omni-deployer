@@ -16,6 +16,7 @@ scope('omni-factory:exec')
     'Estimate gas for verifying the OmniCoin Factory contract',
   )
   .addParam('chainId', 'Local Chain Id')
+.addParam('chainIdList', 'List of Chain Id')
   .setAction(async (taskArgs, hre) => {
     const contractAddress = deployedUas[taskArgs.chainId.toString()];
     const omniFactory = await hre.ethers.getContractAt(
@@ -25,7 +26,7 @@ scope('omni-factory:exec')
 
     const nativeFees = await omniFactory.estimateVerifyFee(
       deploymentId,
-      taskArgs.chainIds,
+      taskArgs.chainIdList.split(','),
     );
     const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
@@ -45,6 +46,7 @@ scope('omni-factory:exec')
 scope('omni-factory:exec')
   .task('verify-oft', 'Verifies the OmniCoin contract')
   .addParam('chainId', 'Local Chain Id')
+  .addParam('chainIdList', 'List of Chain Id')
   .setAction(async (taskArgs, hre) => {
     const contractAddress = deployedUas[taskArgs.chainId.toString()];
     const omniFactory = await hre.ethers.getContractAt(
@@ -54,16 +56,16 @@ scope('omni-factory:exec')
 
     const nativeFees = await omniFactory.estimateVerifyFee(
       deploymentId,
-      taskArgs.chainIds,
+      taskArgs.chainIdList.split(','),
     );
     const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
     const tx = await omniFactory.verifyRemoteCoinDeployment(
       deploymentId,
-      taskArgs.chainIds,
+      taskArgs.chainIdList.split(','),
       nativeFees.map((fee) => fee.toString()),
       { value: totalNativeFees },
     );
     const receipt = await tx.wait();
-    console.log('OFT deployed. https://layerzeroscan.com/tx/' + receipt?.hash);
+    console.log('OFT verified. https://layerzeroscan.com/tx/' + receipt?.hash);
   });
