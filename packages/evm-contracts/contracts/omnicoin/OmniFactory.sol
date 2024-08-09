@@ -30,7 +30,6 @@ struct DeployRemoteCoinChainConfig {
   uint16 _remoteChainId;
   address _receiver;
   uint256 _remoteSupplyAmount;
-  address _remoteFactoryAddress;
 }
 
 struct VerifyRemoteCoin {
@@ -48,17 +47,15 @@ contract OmniFactory is NonblockingLzApp {
   event RemoteCoinDeployed(
     bytes32 indexed deploymentId,
     address indexed creator,
-    address[] remoteFactoryAddress,
     uint16[] chainIds
   );
   event RemoteCoinVerified(
     bytes32 indexed deploymentId,
     address indexed creator,
-    address[] remoteFactoryAddress,
     uint16[] chainIds
   );
 
-  uint256 internal constant gasForDestinationLzReceive = 2_000_000_000;
+  uint256 internal constant gasForDestinationLzReceive = 5_000_000;
 
   OmniFactoryStorage public factoryStorage;
 
@@ -219,8 +216,7 @@ contract OmniFactory is NonblockingLzApp {
           _remoteConfig: DeployRemoteCoinChainConfig({
             _remoteChainId: _remoteConfigs[i]._remoteChainId,
             _receiver: _remoteConfigs[i]._receiver,
-            _remoteSupplyAmount: _remoteConfigs[i]._remoteSupplyAmount,
-            _remoteFactoryAddress: _remoteConfigs[i]._remoteFactoryAddress
+            _remoteSupplyAmount: _remoteConfigs[i]._remoteSupplyAmount
           })
         });
         bytes memory deployBytes = abi.encode(deployData);
@@ -295,12 +291,8 @@ contract OmniFactory is NonblockingLzApp {
     bytes memory adapterParams = _getAdapterParams();
 
     uint16[] memory chainIds = new uint16[](_remoteConfigs.length);
-    address[] memory remoteFactoryAddresses = new address[](
-      _remoteConfigs.length
-    );
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
       chainIds[i] = _remoteConfigs[i]._remoteChainId;
-      remoteFactoryAddresses[i] = _remoteConfigs[i]._remoteFactoryAddress;
     }
     bytes32 deploymentId = _generateDeploymentId(
       msg.sender,
@@ -346,12 +338,7 @@ contract OmniFactory is NonblockingLzApp {
         );
       }
     }
-    emit RemoteCoinDeployed(
-      deploymentId,
-      msg.sender,
-      remoteFactoryAddresses,
-      chainIds
-    );
+    emit RemoteCoinDeployed(deploymentId, msg.sender, chainIds);
   }
 
   function _prepareCommandBytes(
