@@ -25,11 +25,19 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
     lzEndpoints.map(async (lzEndpoint) => await lzEndpoint.getAddress()),
   );
 
+  // deploy the factory storage contract
+  const OmniFactoryStorage =
+    await hre.ethers.getContractFactory('OmniFactoryStorage');
+  const omniFactoryStorages = await Promise.all(
+    lzEndpointAddresses.map(async () => await OmniFactoryStorage.deploy()),
+  );
+
   // deploy the factory contract
   const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
   const omniFactories = await Promise.all(
     lzEndpointAddresses.map(
-      async (lzEndpointAddress) => await OmniFactory.deploy(lzEndpointAddress),
+      async (lzEndpointAddress, index) =>
+        await OmniFactory.deploy(lzEndpointAddress, omniFactoryStorages[index]),
     ),
   );
   const omniFactoryAddresses = await Promise.all(
@@ -68,6 +76,7 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
     lzEndpointAddresses,
     omniFactories,
     omniFactoryAddresses,
+    omniFactoryStorages,
   };
 };
 

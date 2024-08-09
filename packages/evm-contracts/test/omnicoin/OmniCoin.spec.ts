@@ -110,6 +110,10 @@ describe('OmniCoin', () => {
         await tx.wait();
       }
 
+      // set mindstgaslimit
+      // await localOFT.setMinDstGas(remoteChainId, 0, 200000)
+      // await localOFT.setMinDstGas(remoteChainId, 1, 200000)
+
       // setDestLzEndpoint
       for (let i = 0; i < localCoinDeployedData.length; i++) {
         for (let j = 0; j < localCoinDeployedData.length; j++) {

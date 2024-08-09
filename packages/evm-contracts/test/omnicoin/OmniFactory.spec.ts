@@ -18,9 +18,17 @@ describe('OmniFactory', () => {
       const lzEndpoint = await LZEndpointMock.deploy(1);
       const lzEndpointAddress = await lzEndpoint.getAddress();
 
+      // dpeloys the factory contract storage
+      const OmniFactoryStorage =
+        await hre.ethers.getContractFactory('OmniFactoryStorage');
+      const factoryStorageContract = await OmniFactoryStorage.deploy();
+
       // deploy the factory contract
       const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
-      const factoryContract = await OmniFactory.deploy(lzEndpointAddress);
+      const factoryContract = await OmniFactory.deploy(
+        lzEndpointAddress,
+        await factoryStorageContract.getAddress(),
+      );
 
       // ---------- act ---------- //
       const actual = await factoryContract.lzEndpoint();
@@ -255,8 +263,12 @@ describe('OmniFactory', () => {
     it('should verify the deployment of remote coin', async () => {
       // ---------- arrange ---------- //
       // prepare the test environment
-      const { chainIds, omniFactoryAddresses, omniFactories } =
-        await prepareTestEnvironments([69, 420, 1337]);
+      const {
+        chainIds,
+        omniFactoryAddresses,
+        omniFactories,
+        omniFactoryStorages,
+      } = await prepareTestEnvironments([69, 420, 1337]);
 
       // prepare the owner
       const [owner] = await hre.ethers.getSigners();
@@ -357,10 +369,9 @@ describe('OmniFactory', () => {
           const { coinDeployedAddress, chainId: coinDeployedChainId } =
             localCoinDeployedData[remoteChainIdIndex];
           const omniFactoryChainId = await omniFactories[i].getChainId();
-          const coinAddressSavedBytes = await omniFactories[i].deployedCoins(
-            deploymentId,
-            coinDeployedChainId,
-          );
+          const coinAddressSavedBytes = await omniFactoryStorages[
+            i
+          ].deployedCoins(deploymentId, coinDeployedChainId);
 
           const abiCoder = new hre.ethers.AbiCoder();
           const [coinAddressSaved] = abiCoder.decode(

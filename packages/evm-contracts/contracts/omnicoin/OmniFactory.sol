@@ -4,6 +4,7 @@ import {ILayerZeroReceiver} from "@layerzerolabs/solidity-examples/contracts/lzA
 import {NonblockingLzApp} from "@layerzerolabs/solidity-examples/contracts/lzApp/NonblockingLzApp.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {OmniCoin} from "./OmniCoin.sol";
+import {OmniFactoryStorage} from "./OmniFactoryStorage.sol";
 // import "hardhat/console.sol";
 
 enum CrossChainCommandId {
@@ -57,24 +58,32 @@ contract OmniFactory is NonblockingLzApp {
     uint16[] chainIds
   );
 
-  uint256 internal constant gasForDestinationLzReceive = 20_000_000;
+  uint256 internal constant gasForDestinationLzReceive = 2_000_000_000;
 
-  // deployedCoins[bytes32(deploymentId)][uint16(chainId)] = address(coin)
-  mapping(bytes32 => mapping(uint16 => bytes)) public deployedCoins;
+  OmniFactoryStorage public factoryStorage;
 
-  // mapping of user nonces
-  mapping(address => uint256) public userNonces;
-
-  constructor(address _endpoint) NonblockingLzApp(_endpoint) {}
+  constructor(
+    address _endpoint,
+    address _factoryStorage
+  ) NonblockingLzApp(_endpoint) {
+    factoryStorage = OmniFactoryStorage(_factoryStorage);
+  }
 
   function _generateDeploymentId(
     address _userAddress,
     uint16 _srcChainId,
     uint16[] memory _chainIds
   ) internal view returns (bytes32) {
-    uint256 nonce = userNonces[_userAddress];
+    // uint256 nonce = userNonces[_userAddress];
     return
-      keccak256(abi.encodePacked(_userAddress, _srcChainId, _chainIds, nonce));
+      keccak256(
+        abi.encodePacked(
+          _userAddress,
+          _srcChainId,
+          _chainIds,
+          factoryStorage.getUserNonce(_userAddress)
+        )
+      );
   }
 
   function getChainId() public view returns (uint16) {
@@ -113,36 +122,20 @@ contract OmniFactory is NonblockingLzApp {
         (VerifyRemoteCoin)
       );
 
-      _setCoinDeployedAddress(
+      factoryStorage.setDeployedCoin(
         verifyData._deploymentId,
         verifyData._chainId,
         verifyData._deployedCoinAddress
       );
 
-      _setOmniCoinTrustedRemote(verifyData._deploymentId, verifyData._chainId);
+      factoryStorage.setOmniCoinTrustedRemote(
+        verifyData._deploymentId,
+        lzEndpoint.getChainId(),
+        verifyData._chainId
+      );
 
       return;
     }
-  }
-
-  function _setOmniCoinTrustedRemote(
-    bytes32 _deploymentId,
-    uint16 _remoteChainId
-  ) internal {
-    address remoteCoinAddress = abi.decode(
-      deployedCoins[_deploymentId][_remoteChainId],
-      (address)
-    );
-    address localCoinAddress = abi.decode(
-      deployedCoins[_deploymentId][lzEndpoint.getChainId()],
-      (address)
-    );
-    OmniCoin(payable(localCoinAddress)).setTrustedRemoteAddress(
-      _remoteChainId,
-      abi.encodePacked(remoteCoinAddress)
-    );
-    OmniCoin(payable(localCoinAddress)).setMinDstGas(_remoteChainId, 0, 200000);
-    OmniCoin(payable(localCoinAddress)).setMinDstGas(_remoteChainId, 1, 200000);
   }
 
   function verifyRemoteCoinDeployment(
@@ -158,7 +151,10 @@ contract OmniFactory is NonblockingLzApp {
         VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
           _deploymentId: _deploymentId,
           _chainId: currentChainId,
-          _deployedCoinAddress: deployedCoins[_deploymentId][currentChainId]
+          _deployedCoinAddress: factoryStorage.getDeployedCoin(
+            _deploymentId,
+            currentChainId
+          )
         });
         bytes memory verifyBytes = abi.encode(verifyData);
 
@@ -186,31 +182,18 @@ contract OmniFactory is NonblockingLzApp {
     uint8 _coinDecimals,
     uint256 _coinTotalSupply,
     address _receiver
-  ) internal returns (OmniCoin newCoin) {
-    newCoin = new OmniCoin(
+  ) internal {
+    address newCoin = factoryStorage.deployLocalCoin(
       _deploymentId,
       _coinName,
       _coinTicker,
       _coinDecimals,
       _coinTotalSupply,
       _receiver,
-      address(lzEndpoint)
+      address(lzEndpoint),
+      lzEndpoint.getChainId()
     );
-    _setCoinDeployedAddress(
-      _deploymentId,
-      lzEndpoint.getChainId(),
-      abi.encode(address(newCoin))
-    );
-    // _setOmniCoinTrustedRemote(_deploymentId, lzEndpoint.getChainId());
-    emit LocalCoinDeployed(_deploymentId, address(newCoin), _receiver);
-  }
-
-  function _setCoinDeployedAddress(
-    bytes32 _deploymentId,
-    uint16 _chainId,
-    bytes memory _coinAddress
-  ) internal {
-    deployedCoins[_deploymentId][_chainId] = _coinAddress;
+    emit LocalCoinDeployed(_deploymentId, newCoin, _receiver);
   }
 
   function estimateDeployFee(
@@ -276,7 +259,10 @@ contract OmniFactory is NonblockingLzApp {
         VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
           _deploymentId: _deploymentId,
           _chainId: currentChainId,
-          _deployedCoinAddress: deployedCoins[_deploymentId][currentChainId]
+          _deployedCoinAddress: factoryStorage.getDeployedCoin(
+            _deploymentId,
+            currentChainId
+          )
         });
         bytes memory verifyBytes = abi.encode(verifyData);
 
@@ -322,7 +308,7 @@ contract OmniFactory is NonblockingLzApp {
       chainIds
     );
 
-    userNonces[msg.sender] += 1;
+    factoryStorage.incrementUserNonce(msg.sender);
 
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
       if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {

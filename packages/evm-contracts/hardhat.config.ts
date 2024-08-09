@@ -21,7 +21,7 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: false,
-    only: ['OmniFactory', 'OmniCoin'],
+    only: ['OmniFactory', 'OmniCoin', 'OmniFactoryStorage'],
   },
   networks: {
     arbitrumOne: {
