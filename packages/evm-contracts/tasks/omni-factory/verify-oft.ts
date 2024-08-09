@@ -7,7 +7,8 @@ const deployedUas: Record<string, string> = {
   '184': '0xA65fEC67cFcc50Fe40455Df3a570613EF9Fcb25A',
 };
 
-const deploymentId = '0xE1BEF6A67A00734328693EBB37FCCEECE6980EB88BAB7A6E21101EE463AADF7A';
+const deploymentId =
+  '0xE1BEF6A67A00734328693EBB37FCCEECE6980EB88BAB7A6E21101EE463AADF7A';
 
 scope('omni-factory:exec')
   .task(
@@ -64,5 +65,5 @@ scope('omni-factory:exec')
       { value: totalNativeFees },
     );
     const receipt = await tx.wait();
-    console.log('OFT deployed. https://layerzeroscan.com/tx/' +  receipt?.hash);
+    console.log('OFT deployed. https://layerzeroscan.com/tx/' + receipt?.hash);
   });

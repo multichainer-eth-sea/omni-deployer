@@ -20,15 +20,15 @@ scope('omni-factory:prepare')
       const chainId = Object.keys(deployedUas)[i];
 
       // if (chainId !== taskArgs.chainId) {
-        const tx = await omniFactory.setTrustedRemote(
-          chainId,
-          hre.ethers.solidityPacked(
-            ['address', 'address'],
-            [deployedUas[chainId], contractAddress],
-          ),
-        );
-        await tx.wait();
-        console.log(`Set trusted remote for ${taskArgs.chainId} to ${chainId}`);
+      const tx = await omniFactory.setTrustedRemote(
+        chainId,
+        hre.ethers.solidityPacked(
+          ['address', 'address'],
+          [deployedUas[chainId], contractAddress],
+        ),
+      );
+      await tx.wait();
+      console.log(`Set trusted remote for ${taskArgs.chainId} to ${chainId}`);
       // }
     }
   });

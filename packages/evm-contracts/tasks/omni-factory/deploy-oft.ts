@@ -109,5 +109,5 @@ scope('omni-factory:exec')
       { value: totalNativeFees },
     );
     const receipt = await tx.wait();
-    console.log('OFT deployed. https://layerzeroscan.com/tx/' +  receipt?.hash);
+    console.log('OFT deployed. https://layerzeroscan.com/tx/' + receipt?.hash);
   });
