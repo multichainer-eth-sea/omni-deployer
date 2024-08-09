@@ -1,14 +1,9 @@
 import { scope } from 'hardhat/config';
 import { ethers } from 'ethers';
-
-const deployedUas: Record<string, string> = {
-  '110': '0x96832fd5F4B76A447099eE93575Bd8ba612ec9C4',
-  '111': '0xcC95B595B098bFCa2a13582929A57166c5747e5B',
-  '184': '0xA65fEC67cFcc50Fe40455Df3a570613EF9Fcb25A',
-};
+import { deployedUas } from './common';
 
 const deploymentId =
-  '0xE1BEF6A67A00734328693EBB37FCCEECE6980EB88BAB7A6E21101EE463AADF7A';
+  '0x29004138095413185A2006F3A09FF83C6D1FEACEA871B22325968689F6698D10';
 
 scope('omni-factory:exec')
   .task(
@@ -16,7 +11,7 @@ scope('omni-factory:exec')
     'Estimate gas for verifying the OmniCoin Factory contract',
   )
   .addParam('chainId', 'Local Chain Id')
-.addParam('chainIdList', 'List of Chain Id')
+  .addParam('chainIdList', 'List of Chain Id')
   .setAction(async (taskArgs, hre) => {
     const contractAddress = deployedUas[taskArgs.chainId.toString()];
     const omniFactory = await hre.ethers.getContractAt(

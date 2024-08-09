@@ -56,13 +56,16 @@ contract OmniFactory is NonblockingLzApp {
   );
 
   uint256 internal constant gasForDestinationLzReceive = 5_000_000;
+  uint16 v1chainId;
 
   OmniFactoryStorage public factoryStorage;
 
   constructor(
     address _endpoint,
+    uint16 _v1chainId,
     address _factoryStorage
   ) NonblockingLzApp(_endpoint) {
+    v1chainId = _v1chainId;
     factoryStorage = OmniFactoryStorage(_factoryStorage);
   }
 
@@ -84,7 +87,7 @@ contract OmniFactory is NonblockingLzApp {
   }
 
   function getChainId() public view returns (uint16) {
-    return lzEndpoint.getChainId();
+    return v1chainId;
   }
 
   function _nonblockingLzReceive(
@@ -127,7 +130,7 @@ contract OmniFactory is NonblockingLzApp {
 
       factoryStorage.setOmniCoinTrustedRemote(
         verifyData._deploymentId,
-        lzEndpoint.getChainId(),
+        v1chainId,
         verifyData._chainId
       );
 
@@ -141,16 +144,15 @@ contract OmniFactory is NonblockingLzApp {
     uint256[] memory _nativeFees
   ) public payable {
     bytes memory adapterParams = _getAdapterParams();
-    uint16 currentChainId = lzEndpoint.getChainId();
 
     for (uint256 i = 0; i < _remoteChainIds.length; i++) {
-      if (_remoteChainIds[i] != currentChainId) {
+      if (_remoteChainIds[i] != v1chainId) {
         VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
           _deploymentId: _deploymentId,
-          _chainId: currentChainId,
+          _chainId: v1chainId,
           _deployedCoinAddress: factoryStorage.getDeployedCoin(
             _deploymentId,
-            currentChainId
+            v1chainId
           )
         });
         bytes memory verifyBytes = abi.encode(verifyData);
@@ -188,7 +190,7 @@ contract OmniFactory is NonblockingLzApp {
       _coinTotalSupply,
       _receiver,
       address(lzEndpoint),
-      lzEndpoint.getChainId()
+      v1chainId
     );
     emit LocalCoinDeployed(_deploymentId, newCoin, _receiver);
   }
@@ -204,7 +206,7 @@ contract OmniFactory is NonblockingLzApp {
 
     nativeFees = new uint256[](_remoteConfigs.length);
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
-      if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {
+      if (_remoteConfigs[i]._remoteChainId == v1chainId) {
         nativeFees[i] = 0;
       } else {
         DeployRemoteCoin memory deployData = DeployRemoteCoin({
@@ -246,18 +248,17 @@ contract OmniFactory is NonblockingLzApp {
     nativeFees = new uint256[](_remoteChainIds.length);
 
     bytes memory adapterParams = _getAdapterParams();
-    uint16 currentChainId = lzEndpoint.getChainId();
 
     for (uint256 i = 0; i < _remoteChainIds.length; i++) {
-      if (_remoteChainIds[i] == lzEndpoint.getChainId()) {
+      if (_remoteChainIds[i] == v1chainId) {
         nativeFees[i] = 0;
       } else {
         VerifyRemoteCoin memory verifyData = VerifyRemoteCoin({
           _deploymentId: _deploymentId,
-          _chainId: currentChainId,
+          _chainId: v1chainId,
           _deployedCoinAddress: factoryStorage.getDeployedCoin(
             _deploymentId,
-            currentChainId
+            v1chainId
           )
         });
         bytes memory verifyBytes = abi.encode(verifyData);
@@ -296,14 +297,14 @@ contract OmniFactory is NonblockingLzApp {
     }
     bytes32 deploymentId = _generateDeploymentId(
       msg.sender,
-      lzEndpoint.getChainId(),
+      v1chainId,
       chainIds
     );
 
     factoryStorage.incrementUserNonce(msg.sender);
 
     for (uint256 i = 0; i < _remoteConfigs.length; i++) {
-      if (_remoteConfigs[i]._remoteChainId == lzEndpoint.getChainId()) {
+      if (_remoteConfigs[i]._remoteChainId == v1chainId) {
         _deployLocalCoin(
           deploymentId,
           _coinName,

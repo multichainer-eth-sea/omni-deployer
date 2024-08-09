@@ -12,7 +12,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 100,
       },
     },
   },
@@ -20,7 +20,7 @@ const config: HardhatUserConfig = {
     alphaSort: false,
     disambiguatePaths: false,
     runOnCompile: true,
-    strict: false,
+    strict: true,
     only: ['OmniFactory', 'OmniCoin', 'OmniFactoryStorage'],
   },
   networks: {
@@ -36,9 +36,9 @@ const config: HardhatUserConfig = {
       url: 'https://mainnet.base.org',
       accounts: [envConfig.DEPLOYER_PRIVATE_KEY],
     },
-    hardhat: {
-      allowUnlimitedContractSize: true,
-    },
+    // hardhat: {
+    //   allowUnlimitedContractSize: true,
+    // },
   },
   etherscan: {
     apiKey: {

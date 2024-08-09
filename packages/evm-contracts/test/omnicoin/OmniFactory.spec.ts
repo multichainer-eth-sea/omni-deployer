@@ -27,6 +27,7 @@ describe('OmniFactory', () => {
       const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
       const factoryContract = await OmniFactory.deploy(
         lzEndpointAddress,
+        1,
         await factoryStorageContract.getAddress(),
       );
 

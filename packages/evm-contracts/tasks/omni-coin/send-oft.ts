@@ -2,9 +2,9 @@ import { scope } from 'hardhat/config';
 import { ethers } from 'ethers';
 
 const deployedOFT: Record<string, string> = {
-  '110': '0x0bd2ba5ed93acfb7250759800c4d31b3acaed454',
-  '111': '0x6dec538d8a02c0f1a86043ddfaed8f4357e5eefd',
-  '184': '0x9d874fb951F31586E283C21f7DBFB874f6636D25',
+  '110': '0x17802ca7d7e5b086c7e42edef0a5387e4c405a15',
+  '111': '0xa77595e18f0ba041294d43ac3ab10bd929aae271',
+  '184': '0x47297efe938f57e3b9d8d16c5c2ac3f503040023',
 };
 
 const sendToAmount: Record<string, string> = {
@@ -15,10 +15,11 @@ const sendToAmount: Record<string, string> = {
 
 scope('omni-coin:exec')
   .task('estimate-send-oft', 'Estimate gas for sending OFT to remote chain')
-  .addParam('chainId', 'Local Chain Id')
+  .addParam('fromChainId', 'Local Chain Id')
+  .addParam('toChainId', 'Remote Chain Id')
   .addParam('to', 'To Address')
   .setAction(async (taskArgs, hre) => {
-    const contractAddress = deployedOFT[taskArgs.chainId.toString()];
+    const contractAddress = deployedOFT[taskArgs.fromChainId.toString()];
     const omniCoin = await hre.ethers.getContractAt(
       'OmniCoin',
       contractAddress,
@@ -29,11 +30,11 @@ scope('omni-coin:exec')
       ['uint16', 'uint256'],
       [1, 200000],
     );
-    const transferAmount = ethers.parseEther(sendToAmount[taskArgs.chainId]);
+    const transferAmount = ethers.parseEther(sendToAmount[taskArgs.toChainId]);
 
     // estimate nativeFees
     const { nativeFee } = await omniCoin.estimateSendFee(
-      taskArgs.chainId,
+      taskArgs.toChainId,
       toAddress,
       transferAmount,
       false,
@@ -49,11 +50,12 @@ scope('omni-coin:exec')
 
 scope('omni-coin:exec')
   .task('send-oft', 'Send OFT to remote chain')
-  .addParam('chainId', 'Local Chain Id')
+  .addParam('fromChainId', 'Local Chain Id')
+  .addParam('toChainId', 'Remote Chain Id')
   .addParam('from', 'From Address')
   .addParam('to', 'To Address')
   .setAction(async (taskArgs, hre) => {
-    const contractAddress = deployedOFT[taskArgs.chainId.toString()];
+    const contractAddress = deployedOFT[taskArgs.fromChainId.toString()];
     const omniCoin = await hre.ethers.getContractAt(
       'OmniCoin',
       contractAddress,
@@ -64,11 +66,11 @@ scope('omni-coin:exec')
       ['uint16', 'uint256'],
       [1, 200000],
     );
-    const transferAmount = ethers.parseEther(sendToAmount[taskArgs.chainId]);
+    const transferAmount = ethers.parseEther(sendToAmount[taskArgs.toChainId]);
 
     // estimate nativeFees
     const { nativeFee } = await omniCoin.estimateSendFee(
-      taskArgs.chainId,
+      taskArgs.toChainId,
       toAddress,
       transferAmount,
       false,
@@ -77,7 +79,7 @@ scope('omni-coin:exec')
 
     const tx = await omniCoin.sendFrom(
       taskArgs.from,
-      taskArgs.chainId,
+      taskArgs.toChainId,
       toAddress,
       transferAmount,
       {
@@ -89,5 +91,5 @@ scope('omni-coin:exec')
     );
 
     const receipt = await tx.wait();
-    console.log('OFT verified. https://layerzeroscan.com/tx/' + receipt?.hash);
+    console.log('OFT sent. https://layerzeroscan.com/tx/' + receipt?.hash);
   });

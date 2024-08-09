@@ -36,7 +36,11 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
   const omniFactories = await Promise.all(
     lzEndpointAddresses.map(
       async (lzEndpointAddress, index) =>
-        await OmniFactory.deploy(lzEndpointAddress, omniFactoryStorages[index]),
+        await OmniFactory.deploy(
+          lzEndpointAddress,
+          chainIds[index],
+          omniFactoryStorages[index],
+        ),
     ),
   );
   const omniFactoryAddresses = await Promise.all(
