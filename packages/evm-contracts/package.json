@@ -9,6 +9,7 @@
     "task:play": "hardhat play",
     "omni-factory:prepare": "hardhat omni-factory:prepare",
     "omni-factory:exec": "hardhat omni-factory:exec",
+    "omni-coin:exec": "hardhat omni-coin:exec",
     "format": "prettier --write ."
   },
   "devDependencies": {

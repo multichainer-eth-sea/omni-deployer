@@ -7,8 +7,7 @@ const deployedUas: Record<string, string> = {
   '184': '0xA65fEC67cFcc50Fe40455Df3a570613EF9Fcb25A',
 };
 
-const deploymentId =
-  '0xE1BEF6A67A00734328693EBB37FCCEECE6980EB88BAB7A6E21101EE463AADF7A';
+const deploymentId = '0xE1BEF6A67A00734328693EBB37FCCEECE6980EB88BAB7A6E21101EE463AADF7A';
 
 scope('omni-factory:exec')
   .task(
@@ -16,7 +15,6 @@ scope('omni-factory:exec')
     'Estimate gas for verifying the OmniCoin Factory contract',
   )
   .addParam('chainId', 'Local Chain Id')
-  .addParam('chainIdList', 'Deployed Chain Ids')
   .setAction(async (taskArgs, hre) => {
     const contractAddress = deployedUas[taskArgs.chainId.toString()];
     const omniFactory = await hre.ethers.getContractAt(
@@ -26,7 +24,7 @@ scope('omni-factory:exec')
 
     const nativeFees = await omniFactory.estimateVerifyFee(
       deploymentId,
-      taskArgs.chainIdList.split(','),
+      taskArgs.chainIds,
     );
     const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
@@ -44,9 +42,8 @@ scope('omni-factory:exec')
   });
 
 scope('omni-factory:exec')
-  .task('verify-oft', 'Verify the OmniCoin contract')
+  .task('verify-oft', 'Verifies the OmniCoin contract')
   .addParam('chainId', 'Local Chain Id')
-  .addParam('chainIdList', 'Deployed Chain Ids')
   .setAction(async (taskArgs, hre) => {
     const contractAddress = deployedUas[taskArgs.chainId.toString()];
     const omniFactory = await hre.ethers.getContractAt(
@@ -56,16 +53,16 @@ scope('omni-factory:exec')
 
     const nativeFees = await omniFactory.estimateVerifyFee(
       deploymentId,
-      taskArgs.chainIdList.split(','),
+      taskArgs.chainIds,
     );
     const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
 
     const tx = await omniFactory.verifyRemoteCoinDeployment(
       deploymentId,
-      taskArgs.chainIdList.split(','),
+      taskArgs.chainIds,
       nativeFees.map((fee) => fee.toString()),
       { value: totalNativeFees },
     );
     const receipt = await tx.wait();
-    console.log('OFT verified. https://layerzeroscan.com/tx/' + receipt?.hash);
+    console.log('OFT deployed. https://layerzeroscan.com/tx/' +  receipt?.hash);
   });
