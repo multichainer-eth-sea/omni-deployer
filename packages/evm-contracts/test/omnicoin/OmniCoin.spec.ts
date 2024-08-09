@@ -53,7 +53,6 @@ describe('OmniCoin', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -74,7 +73,6 @@ describe('OmniCoin', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
@@ -109,6 +107,10 @@ describe('OmniCoin', () => {
         );
         await tx.wait();
       }
+
+      // set mindstgaslimit
+      // await localOFT.setMinDstGas(remoteChainId, 0, 200000)
+      // await localOFT.setMinDstGas(remoteChainId, 1, 200000)
 
       // setDestLzEndpoint
       for (let i = 0; i < localCoinDeployedData.length; i++) {

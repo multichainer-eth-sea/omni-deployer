@@ -18,66 +18,24 @@ describe('OmniFactory', () => {
       const lzEndpoint = await LZEndpointMock.deploy(1);
       const lzEndpointAddress = await lzEndpoint.getAddress();
 
+      // dpeloys the factory contract storage
+      const OmniFactoryStorage =
+        await hre.ethers.getContractFactory('OmniFactoryStorage');
+      const factoryStorageContract = await OmniFactoryStorage.deploy();
+
       // deploy the factory contract
       const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
-      const factoryContract = await OmniFactory.deploy(lzEndpointAddress);
+      const factoryContract = await OmniFactory.deploy(
+        lzEndpointAddress,
+        1,
+        await factoryStorageContract.getAddress(),
+      );
 
       // ---------- act ---------- //
       const actual = await factoryContract.lzEndpoint();
 
       // ---------- assert ---------- //
       expect(actual).to.equal(lzEndpointAddress);
-    });
-  });
-
-  describe('deployLocalCoin()', () => {
-    it('should deploy coin on local chain', async () => {
-      // ---------- arrange ---------- //
-      // prepare the owner
-      const [owner] = await hre.ethers.getSigners();
-
-      // prepare the endpoints
-      const LZEndpointMock =
-        await hre.ethers.getContractFactory('LZEndpointMock');
-      const lzEndpoint = await LZEndpointMock.deploy(1);
-      const lzEndpointAddress = await lzEndpoint.getAddress();
-
-      // deploy the factory contract
-      const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
-      const omniFactory = await OmniFactory.deploy(lzEndpointAddress);
-
-      // prepare the coin details
-      const coinDetails = {
-        name: 'Omni Pepe',
-        symbol: 'POPO',
-        decimals: '18',
-        totalSupply: '1000000000000000000000',
-      };
-
-      // ---------- act ---------- //
-      // run deployLocalCoin()
-      await (
-        await omniFactory.deployLocalCoin(
-          coinDetails.name,
-          coinDetails.symbol,
-          coinDetails.decimals,
-          coinDetails.totalSupply,
-        )
-      ).wait();
-
-      // retreive the coin address deployed
-      const { coinDeployedAddress, receiverAddress, coinDeployed } =
-        await getLocalCoinDeployedAddress(omniFactory);
-
-      // ---------- assert ---------- //
-      expect(coinDeployedAddress).to.not.be.empty;
-      expect(receiverAddress).to.equal(owner.address);
-      expect(await coinDeployed.name()).to.equal(coinDetails.name);
-      expect(await coinDeployed.symbol()).to.equal(coinDetails.symbol);
-      expect(await coinDeployed.decimals()).to.equal(coinDetails.decimals);
-      expect(await coinDeployed.totalSupply()).to.equal(
-        coinDetails.totalSupply,
-      );
     });
   });
 
@@ -114,7 +72,6 @@ describe('OmniFactory', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -136,7 +93,6 @@ describe('OmniFactory', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
@@ -230,7 +186,6 @@ describe('OmniFactory', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -252,7 +207,6 @@ describe('OmniFactory', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
@@ -306,8 +260,12 @@ describe('OmniFactory', () => {
     it('should verify the deployment of remote coin', async () => {
       // ---------- arrange ---------- //
       // prepare the test environment
-      const { chainIds, omniFactoryAddresses, omniFactories } =
-        await prepareTestEnvironments([69, 420, 1337]);
+      const {
+        chainIds,
+        omniFactoryAddresses,
+        omniFactories,
+        omniFactoryStorages,
+      } = await prepareTestEnvironments([69, 420, 1337]);
 
       // prepare the owner
       const [owner] = await hre.ethers.getSigners();
@@ -340,7 +298,6 @@ describe('OmniFactory', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -361,7 +318,6 @@ describe('OmniFactory', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
@@ -408,10 +364,9 @@ describe('OmniFactory', () => {
           const { coinDeployedAddress, chainId: coinDeployedChainId } =
             localCoinDeployedData[remoteChainIdIndex];
           const omniFactoryChainId = await omniFactories[i].getChainId();
-          const coinAddressSavedBytes = await omniFactories[i].deployedCoins(
-            deploymentId,
-            coinDeployedChainId,
-          );
+          const coinAddressSavedBytes = await omniFactoryStorages[
+            i
+          ].deployedCoins(deploymentId, coinDeployedChainId);
 
           const abiCoder = new hre.ethers.AbiCoder();
           const [coinAddressSaved] = abiCoder.decode(

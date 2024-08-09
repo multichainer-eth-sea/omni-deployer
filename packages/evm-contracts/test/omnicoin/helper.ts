@@ -5,7 +5,6 @@ export type CoinDetailsRemoteConfig = {
   remoteChainId: number;
   receiver: string;
   remoteSupplyAmount: string;
-  remoteFactoryAddress: string;
 };
 export type CoinDetails = {
   name: string;
@@ -25,11 +24,23 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
     lzEndpoints.map(async (lzEndpoint) => await lzEndpoint.getAddress()),
   );
 
+  // deploy the factory storage contract
+  const OmniFactoryStorage =
+    await hre.ethers.getContractFactory('OmniFactoryStorage');
+  const omniFactoryStorages = await Promise.all(
+    lzEndpointAddresses.map(async () => await OmniFactoryStorage.deploy()),
+  );
+
   // deploy the factory contract
   const OmniFactory = await hre.ethers.getContractFactory('OmniFactory');
   const omniFactories = await Promise.all(
     lzEndpointAddresses.map(
-      async (lzEndpointAddress) => await OmniFactory.deploy(lzEndpointAddress),
+      async (lzEndpointAddress, index) =>
+        await OmniFactory.deploy(
+          lzEndpointAddress,
+          chainIds[index],
+          omniFactoryStorages[index],
+        ),
     ),
   );
   const omniFactoryAddresses = await Promise.all(
@@ -68,6 +79,7 @@ export const prepareTestEnvironments = async (chainIds: number[]) => {
     lzEndpointAddresses,
     omniFactories,
     omniFactoryAddresses,
+    omniFactoryStorages,
   };
 };
 
@@ -84,7 +96,6 @@ export const getEstimatedDeployFees = async (
       _remoteChainId: config.remoteChainId,
       _receiver: config.receiver,
       _remoteSupplyAmount: config.remoteSupplyAmount,
-      _remoteFactoryAddress: config.remoteFactoryAddress,
     })),
   );
   const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
