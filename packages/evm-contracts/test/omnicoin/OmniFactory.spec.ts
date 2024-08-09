@@ -71,7 +71,6 @@ describe('OmniFactory', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -93,7 +92,6 @@ describe('OmniFactory', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
@@ -187,7 +185,6 @@ describe('OmniFactory', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -209,7 +206,6 @@ describe('OmniFactory', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },
@@ -301,7 +297,6 @@ describe('OmniFactory', () => {
           remoteChainId: chainIds[rawConfig.chainIdIndex],
           receiver: rawConfig.receiverAddress,
           remoteSupplyAmount: rawConfig.remoteSupplyAmount,
-          remoteFactoryAddress: omniFactoryAddresses[rawConfig.chainIdIndex],
         })),
       };
 
@@ -322,7 +317,6 @@ describe('OmniFactory', () => {
             _remoteChainId: config.remoteChainId,
             _receiver: config.receiver,
             _remoteSupplyAmount: config.remoteSupplyAmount,
-            _remoteFactoryAddress: config.remoteFactoryAddress,
           })),
           nativeFees.map((fee) => fee.toString()),
           { value: totalNativeFees },

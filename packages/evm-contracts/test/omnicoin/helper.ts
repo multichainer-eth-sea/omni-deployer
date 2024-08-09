@@ -5,7 +5,6 @@ export type CoinDetailsRemoteConfig = {
   remoteChainId: number;
   receiver: string;
   remoteSupplyAmount: string;
-  remoteFactoryAddress: string;
 };
 export type CoinDetails = {
   name: string;
@@ -93,7 +92,6 @@ export const getEstimatedDeployFees = async (
       _remoteChainId: config.remoteChainId,
       _receiver: config.receiver,
       _remoteSupplyAmount: config.remoteSupplyAmount,
-      _remoteFactoryAddress: config.remoteFactoryAddress,
     })),
   );
   const totalNativeFees = nativeFees.reduce((acc, cur) => (acc += cur), 0n);
