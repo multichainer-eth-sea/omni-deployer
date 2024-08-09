@@ -7,7 +7,8 @@
     "deploy:factory": "hardhat deploy omnicoin-factory",
     "deploy:lz-v1": "hardhat deploy lz-v1",
     "task:play": "hardhat play",
-    "set-trusted-remote:factory": "hardhat set-trusted-remote omnicoin-factory",
+    "omni-factory:prepare": "hardhat omni-factory:prepare",
+    "omni-factory:exec": "hardhat omni-factory:exec",
     "format": "prettier --write ."
   },
   "devDependencies": {
