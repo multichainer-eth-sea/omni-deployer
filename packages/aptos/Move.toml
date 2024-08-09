@@ -1,41 +1,21 @@
 [package]
-name = "CrossChainToken"
+name = "cross_chain"
 version = "0.0.1"
-authors = ["Your Name"]
 
 [addresses]
-std = "0x1"
-aptos-stdlib = "0x1"
-aptos_framework = "0x1"
-aptos_std = "0x1"
 cross_chain = "_"
-token_bridge = "_"
-wormhole = "_"
-deployer = "_"
-deployer_aux = "_"
-aux = "_"
 
-[dev-addresses]
-cross_chain = "0x66"
-token_bridge = "0x576410486a2da45eee6c949c995670112ddf2fbeedab20350d506328eefc9d4f"
-wormhole = "0x5bc11445584a763c1fa7ed39081f1b920954da14e04b32440cba863d03e19625"
-wrapped_coin = "0xf4f53cc591e5190eddbc43940746e2b5deea6e0e1562b2bba765d488504842c7"
-deployer = "0x0108bc32f7de18a5f6e1e7d6ee7aff9f5fc858d0d87ac0da94dd8d2a5d267d6b"
-aux = '0x4c8e0dc1b53b7759c9d8998685453a0e06565f054f3635a18d4928520eec676d'
-deployer_aux = '0x8686'
+# Testnet Addresses
+layerzero = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+layerzero_common = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+msglib_auth = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+msglib_v1_1 = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+msglib_v2 = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+zro = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+executor_auth = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+executor_v2 = "0x1759cc0d3161f1eb79f65847d4feb9d1f74fb79014698a23b16b28b9cd4c37e3"
+layerzero_apps = "0x2f972c173927006c83277b6e6ae38f83482eba560f343d022f145979020d3621"
 
-[dependencies.TokenBridge]
-git = "https://github.com/wormhole-foundation/wormhole.git"
-rev = "main"
-subdir = "aptos/token_bridge"
-
-[dependencies.Wormhole]
-git = "https://github.com/wormhole-foundation/wormhole.git"
-rev = "main"
-subdir = "aptos/wormhole"
-
-
-[dependencies.AptosFramework]
-git = "https://github.com/aptos-labs/aptos-core.git"
-rev = "6f83bc6d02207298b2dee91133d75538789bf582"
-subdir = "aptos-move/framework/aptos-framework"
+[dependencies]
+layerzero = { git = "https://github.com/ChefSnoopy/LayerZero-Aptos-Contract.git", subdir = "layerzero", rev = "6f15099fa417b99e4ebaa0ee86af57cd60466f76" }
+layerzero_apps = { git = "https://github.com/ChefSnoopy/LayerZero-Aptos-Contract.git", subdir = "layerzero-apps", rev = "6f15099fa417b99e4ebaa0ee86af57cd60466f76" }
