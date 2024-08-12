@@ -14,6 +14,10 @@ contract BytePlayground {
     uint16 valUint; // 420
   }
 
+  // random string to change the bytecode
+  // https://randomwordgenerator.com/
+  string public rally = "contrast";
+
   function getComplexStruct() public pure returns (MyComplexStruct memory) {
     Post memory post1 = Post("lorem", "ipsum", true);
     Post memory post2 = Post("sir", "dolor", false);

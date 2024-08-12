@@ -1,0 +1,11 @@
+export const deployedUas: Record<string, string> = {
+  '110': '0xa5FbAf70d0C96275392a732299c35F6159464dcd',
+  '111': '0x784F9f5D23D5797b4E92E9A28704171a46f1776b',
+  '184': '0xCDA2a5f649FA46E232EcB8cF88AED0cab001cacA',
+};
+
+export const lzEndpoints: Record<string, string> = {
+  '110': '0x3c2269811836af69497E5F486A85D7316753cf62',
+  '111': '0x3c2269811836af69497E5F486A85D7316753cf62',
+  '184': '0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7',
+};

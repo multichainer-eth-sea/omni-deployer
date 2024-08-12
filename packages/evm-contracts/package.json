@@ -1,12 +1,15 @@
 {
   "name": "@omni-deployer/evm-contracts",
   "scripts": {
-    "build": "hardhat compile",
+    "build": "hardhat compile --force",
     "test": "hardhat test",
     "deploy:coin": "hardhat deploy omnicoin",
     "deploy:factory": "hardhat deploy omnicoin-factory",
     "deploy:lz-v1": "hardhat deploy lz-v1",
     "task:play": "hardhat play",
+    "omni-factory:prepare": "hardhat omni-factory:prepare",
+    "omni-factory:exec": "hardhat omni-factory:exec",
+    "omni-coin:exec": "hardhat omni-coin:exec",
     "format": "prettier --write ."
   },
   "devDependencies": {
@@ -24,6 +27,7 @@
     "chai": "^4.2.0",
     "ethers": "^6.4.0",
     "hardhat": "^2.22.6",
+    "hardhat-contract-sizer": "^2.10.0",
     "hardhat-gas-reporter": "^1.0.8",
     "prettier-plugin-solidity": "^1.3.1",
     "solidity-coverage": "^0.8.1",
@@ -31,7 +35,9 @@
   },
   "dependencies": {
     "@layerzerolabs/solidity-examples": "^1.1.0",
-    "@openzeppelin/contracts": "^5.0.2",
+    "@openzeppelin-3/contracts": "npm:@openzeppelin/contracts@^3.4.2-solc-0.7",
+    "@openzeppelin/contracts": "^4.4.1",
+    "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "dotenv": "^16.4.5",
     "unique-names-generator": "^4.7.1"
   }

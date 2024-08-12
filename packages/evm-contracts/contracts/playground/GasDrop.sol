@@ -40,9 +40,7 @@ contract GasDrop is NonblockingLzApp {
     maxGasLimit = _maxGasLimit;
   }
 
-  constructor(
-    address _endpoint
-  ) NonblockingLzApp(_endpoint) Ownable(msg.sender) {}
+  constructor(address _endpoint) NonblockingLzApp(_endpoint) {}
 
   function _nonblockingLzReceive(
     uint16 /* _srcChainId */,
