@@ -55,9 +55,7 @@ const FormSchema = z.object({
   totalSupply: z.string(),
 });
 
-const _deploymentId =
-  "0xb651b414a7e7f5ab9dd81fbe8787baba7a0ca9771d2c0dc69fc9784ef6679967";
-// const _deploymentId = "";
+const _deploymentId = "";
 
 export function CreateTokenForm() {
   const [deploymentId, setDeploymentId] = useState(_deploymentId);
