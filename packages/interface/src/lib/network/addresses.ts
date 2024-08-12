@@ -20,7 +20,7 @@ const addressBook: AddressBook = {
   [EVMChainId.OPTIMISM]: OPTIMISM_ADDRESS_BOOK,
 };
 
-export const getAddressForChainOrThrow = (
+export const getContractAddressForChainOrThrow = (
   chainId: EVMChainId,
 ): OMNI_DEPLOYER_ADDRESSES => {
   const addresses = addressBook[chainId];
