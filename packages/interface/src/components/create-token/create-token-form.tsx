@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,13 +11,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { NumericalInput } from "@/components/ui/numerical-input";
-import { toast } from "@/components/ui/use-toast";
-import { arbitrum } from "wagmi/chains";
 import {
   deployOFT,
   RemoteDeploymentConfig,
   useSimulateDeployOFT,
 } from "@/hooks/use-simulate-deploy-oft";
+import {
+  useEstimateVerifyOFT,
+  useVerifyRemote,
+} from "@/hooks/use-verify-remote";
+import { OMNI_FACTORY_ABI } from "@/lib/abi/evm";
 import { denormalize } from "@/lib/common/bignumber";
 import {
   EVMChainId,
@@ -26,10 +28,12 @@ import {
   lzChainMetadata,
 } from "@/lib/network/chain-id";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { defineSteps, Stepper, useStepper } from "@stepperize/react";
 import { Terminal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { decodeEventLog, parseAbi } from "viem";
+import { decodeEventLog } from "viem";
+import { waitForTransactionReceipt } from "viem/actions";
 import { useAccount, useClient, useSendTransaction } from "wagmi";
 import { z } from "zod";
 import { CheckerConnect } from "../checker-connect";
@@ -41,12 +45,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { getTransactionReceipt, waitForTransactionReceipt } from "viem/actions";
-import { OMNI_FACTORY_ABI } from "@/lib/abi/evm";
-import {
-  useEstimateVerifyOFT,
-  useVerifyRemote,
-} from "@/hooks/use-verify-remote";
 
 const FormSchema = z.object({
   tokenName: z.string(),
@@ -62,14 +60,6 @@ export function CreateTokenForm() {
   const [verifiedChains, setVerifiedChains] = useState(["", ""]);
   const { address } = useAccount();
   const client = useClient();
-  const { isPending, verifyRemoteCoinDeployment } =
-    useVerifyRemote(deploymentId);
-  const {
-    isRefetching,
-    data: verifyNativeFees,
-    refetch,
-  } = useEstimateVerifyOFT(deploymentId, [110, 111]);
-
   const {
     data: hash,
     isPending: isDeployPending,
@@ -91,6 +81,7 @@ export function CreateTokenForm() {
       if (!address) {
         return [];
       }
+
       return [
         {
           remoteChainId: 110,
@@ -106,7 +97,7 @@ export function CreateTokenForm() {
           remoteSupplyAmount: 0,
         },
       ];
-    }, [address]);
+    }, [address, form.getValues("totalSupply"), form.getValues("decimal")]);
 
   const { data: remoteDeploymentFee } = useSimulateDeployOFT(
     defaultRemoteDeploymentConfigs,
@@ -268,72 +259,100 @@ export function CreateTokenForm() {
           </Form>
         </CardContent>
       </Card>
-      <Card className="md:flex-grow-1 flex-grow-0">
-        <CardHeader>
-          <CardTitle>Verify OFT</CardTitle>
-          <CardDescription>Verify deployed OFT</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-8">
-          {deploymentId ? (
-            defaultRemoteDeploymentConfigs.length > 0 &&
-            defaultRemoteDeploymentConfigs.map((config, index) => (
-              <div
-                className="flex items-center justify-between gap-4"
-                key={index}
-              >
-                <div className="flex items-center gap-4">
-                  <img
-                    src={lzChainMetadata[config.remoteChainId].imgUrl}
-                    className="h-8 w-8"
-                    alt="logo"
-                  />
-                  <p className="text-sm text-foreground/60">
-                    {lzChainMetadata[config.remoteChainId].name}
-                  </p>
-                </div>
-                {verifiedChains[index] ? (
-                  <a
-                    href={`${lzChainMetadata[config.remoteChainId].explorerUrl}/tx/${verifiedChains[index]}`}
-                    className="text-sm text-foreground/60 underline"
-                  >
-                    view transaction
-                  </a>
-                ) : (
-                  <CheckerConnect
-                    requiredChainId={LZ_TO_EVM_CHAIN_ID[config.remoteChainId]}
-                  >
-                    <Button
-                      loading={isPending || isRefetching}
-                      onClick={async () => {
-                        if (!verifyNativeFees) {
-                          return;
-                        }
-
-                        await refetch();
-                        verifyRemoteCoinDeployment(
-                          [110, 111],
-                          verifyNativeFees as bigint[],
-                          (hash) => {
-                            setVerifiedChains((prev) => {
-                              const copy = [...prev];
-                              copy[index] = hash;
-                              return copy;
-                            });
-                          },
-                        );
-                      }}
-                    >
-                      Verify Token
-                    </Button>
-                  </CheckerConnect>
-                )}
-              </div>
-            ))
-          ) : (
-            <p>Please deploy your token to verify</p>
-          )}
-        </CardContent>
-      </Card>
+      <DeployProgress
+        deploymentId={deploymentId}
+        remoteDeploymentConfigs={defaultRemoteDeploymentConfigs}
+        verifiedChains={verifiedChains}
+        setVerifiedChains={setVerifiedChains}
+      />
     </div>
+  );
+}
+function DeployProgress({
+  deploymentId,
+  remoteDeploymentConfigs: defaultRemoteDeploymentConfigs,
+  verifiedChains,
+  setVerifiedChains,
+}: {
+  deploymentId: string;
+  remoteDeploymentConfigs: RemoteDeploymentConfig[];
+  verifiedChains: string[];
+  setVerifiedChains: (params: (value: string[]) => string[]) => void;
+}) {
+  const { isPending, verifyRemoteCoinDeployment } =
+    useVerifyRemote(deploymentId);
+  const {
+    isRefetching,
+    data: verifyNativeFees,
+    refetch,
+  } = useEstimateVerifyOFT(deploymentId, [110, 111]);
+
+  return (
+    <Card className="md:flex-grow-1 flex-grow-0">
+      <CardHeader>
+        <CardTitle>Verify OFT</CardTitle>
+        <CardDescription>Verify deployed OFT</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-8">
+        {deploymentId ? (
+          defaultRemoteDeploymentConfigs.length > 0 &&
+          defaultRemoteDeploymentConfigs.map((config, index) => (
+            <div
+              className="flex items-center justify-between gap-4"
+              key={index}
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={lzChainMetadata[config.remoteChainId].imgUrl}
+                  className="h-8 w-8"
+                  alt="logo"
+                />
+                <p className="text-sm text-foreground/60">
+                  {lzChainMetadata[config.remoteChainId].name}
+                </p>
+              </div>
+              {verifiedChains[index] ? (
+                <a
+                  href={`${lzChainMetadata[config.remoteChainId].explorerUrl}/tx/${verifiedChains[index]}`}
+                  className="text-sm text-foreground/60 underline"
+                >
+                  view transaction
+                </a>
+              ) : (
+                <CheckerConnect
+                  requiredChainId={LZ_TO_EVM_CHAIN_ID[config.remoteChainId]}
+                >
+                  <Button
+                    loading={isPending || isRefetching}
+                    onClick={async () => {
+                      if (!verifyNativeFees) {
+                        return;
+                      }
+
+                      await refetch();
+                      verifyRemoteCoinDeployment(
+                        [110, 111],
+                        verifyNativeFees as bigint[],
+                        (hash) => {
+                          setVerifiedChains((prev: string[]) => {
+                            const copy = [...prev];
+                            copy[index] = hash;
+                            return copy;
+                          });
+                        },
+                      );
+                    }}
+                  >
+                    Verify Token
+                  </Button>
+                </CheckerConnect>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>Please deploy your token to verify</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
