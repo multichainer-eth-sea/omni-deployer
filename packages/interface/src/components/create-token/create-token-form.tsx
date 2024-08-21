@@ -28,7 +28,6 @@ import {
   lzChainMetadata,
 } from "@/lib/network/chain-id";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { defineSteps, Stepper, useStepper } from "@stepperize/react";
 import { Terminal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -151,85 +150,99 @@ export function CreateTokenForm() {
   }
 
   return (
-    <div className="flex w-full flex-wrap-reverse items-start justify-center gap-8 md:flex-wrap">
-      <Card className="max-w-md flex-auto flex-col gap-8">
-        <CardHeader>
-          <CardTitle>Create Token</CardTitle>
-          <CardDescription>Create your OFT Seamlessly</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="tokenName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Token Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Omnicat" {...field} />
-                    </FormControl>
-                    <FormDescription>Name of the Token</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tokenSymbol"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Symbol</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Omni" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Ticker symbol for the Token e.g $OMNI
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="decimal"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Token Decimal</FormLabel>
-                    <FormControl>
-                      <NumericalInput
-                        placeholder="18"
-                        maxDecimal={0}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>Decimal for the token</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="totalSupply"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total Supply</FormLabel>
-                    <FormControl>
-                      <NumericalInput
-                        placeholder="1000000"
-                        maxDecimal={0}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>Total Supply of the Token</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {hash ? (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex w-full flex-wrap-reverse items-start justify-center gap-8 md:flex-wrap">
+          <Card className="max-w-md flex-auto flex-col gap-8">
+            <CardHeader>
+              <CardTitle>Token Metadata</CardTitle>
+              <CardDescription>
+                Fill the form with your token metadata
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="w-full space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="tokenName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Token Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Omnicat" {...field} />
+                      </FormControl>
+                      <FormDescription>Name of the Token</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tokenSymbol"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Symbol</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Omni" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Ticker symbol for the Token e.g $OMNI
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="decimal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Token Decimal</FormLabel>
+                      <FormControl>
+                        <NumericalInput
+                          placeholder="18"
+                          maxDecimal={0}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Decimal for the token</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="totalSupply"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Supply</FormLabel>
+                      <FormControl>
+                        <NumericalInput
+                          placeholder="1000000"
+                          maxDecimal={0}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Total Supply of the Token
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          <DeployProgress
+            deploymentId={deploymentId}
+            remoteDeploymentConfigs={defaultRemoteDeploymentConfigs}
+            verifiedChains={verifiedChains}
+            setVerifiedChains={setVerifiedChains}
+            createTokenButton={
+              hash ? (
                 <Alert>
                   <Terminal className="h-4 w-4" />
                   <AlertTitle>Success</AlertTitle>
@@ -254,30 +267,26 @@ export function CreateTokenForm() {
                     {isDeployPending ? "Creating Token..." : "Create Token"}
                   </Button>
                 </CheckerConnect>
-              )}
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      <DeployProgress
-        deploymentId={deploymentId}
-        remoteDeploymentConfigs={defaultRemoteDeploymentConfigs}
-        verifiedChains={verifiedChains}
-        setVerifiedChains={setVerifiedChains}
-      />
-    </div>
+              )
+            }
+          />
+        </div>
+      </form>
+    </Form>
   );
 }
 function DeployProgress({
   deploymentId,
-  remoteDeploymentConfigs: defaultRemoteDeploymentConfigs,
+  remoteDeploymentConfigs,
   verifiedChains,
   setVerifiedChains,
+  createTokenButton,
 }: {
   deploymentId: string;
   remoteDeploymentConfigs: RemoteDeploymentConfig[];
   verifiedChains: string[];
   setVerifiedChains: (params: (value: string[]) => string[]) => void;
+  createTokenButton?: React.ReactNode;
 }) {
   const { isPending, verifyRemoteCoinDeployment } =
     useVerifyRemote(deploymentId);
@@ -288,20 +297,43 @@ function DeployProgress({
   } = useEstimateVerifyOFT(deploymentId, [110, 111]);
 
   return (
-    <Card className="md:flex-grow-1 flex-grow-0">
-      <CardHeader>
-        <CardTitle>Verify OFT</CardTitle>
-        <CardDescription>Verify deployed OFT</CardDescription>
+    <Card className="flex-grow-0 md:flex-grow-0">
+      <CardHeader className="bg-muted/50">
+        <CardTitle>Deploy Omni Token</CardTitle>
+        <CardDescription>
+          Follow steps bellow to create your omni token
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-8">
-        {deploymentId ? (
-          defaultRemoteDeploymentConfigs.length > 0 &&
-          defaultRemoteDeploymentConfigs.map((config, index) => (
-            <div
-              className="flex items-center justify-between gap-4"
-              key={index}
-            >
-              <div className="flex items-center gap-4">
+      <CardContent className="flex flex-col gap-4 p-6">
+        <div className="flex flex-col gap-2 border-b pb-2">
+          <div className="flex items-center gap-2">
+            <div className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base">
+              <span>1</span>
+            </div>
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Create Token
+            </h4>
+          </div>
+          <CardDescription>
+            Ensure the token metadata you fill is correct
+          </CardDescription>
+          {createTokenButton}
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base">
+              <span>2</span>
+            </div>
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Verify Token
+            </h4>
+          </div>
+          <CardDescription>Verify Token on each network</CardDescription>
+        </div>
+        {remoteDeploymentConfigs.length > 0 &&
+          remoteDeploymentConfigs.map((config, index) => (
+            <div className="flex flex-col justify-between gap-2" key={index}>
+              <div className="flex items-center gap-2">
                 <img
                   src={lzChainMetadata[config.remoteChainId].imgUrl}
                   className="h-8 w-8"
@@ -320,14 +352,14 @@ function DeployProgress({
                 </a>
               ) : (
                 <CheckerConnect
+                  disabled={!deploymentId}
                   requiredChainId={LZ_TO_EVM_CHAIN_ID[config.remoteChainId]}
                 >
                   <Button
                     loading={isPending || isRefetching}
+                    disabled={!deploymentId}
                     onClick={async () => {
-                      if (!verifyNativeFees) {
-                        return;
-                      }
+                      if (!verifyNativeFees) return;
 
                       await refetch();
                       verifyRemoteCoinDeployment(
@@ -348,10 +380,7 @@ function DeployProgress({
                 </CheckerConnect>
               )}
             </div>
-          ))
-        ) : (
-          <p>Please deploy your token to verify</p>
-        )}
+          ))}
       </CardContent>
     </Card>
   );

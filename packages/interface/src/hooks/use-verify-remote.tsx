@@ -81,5 +81,6 @@ export function useEstimateVerifyOFT(deploymentId: string, chainIds: number[]) {
 
       return data;
     },
+    enabled: !!inboundChainId,
   });
 }

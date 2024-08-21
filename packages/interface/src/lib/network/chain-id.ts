@@ -1,3 +1,5 @@
+import { arbitrum } from "viem/chains";
+
 export enum EVMChainId {
   ARBITRUM = 42161,
   OPTIMISM = 10,
