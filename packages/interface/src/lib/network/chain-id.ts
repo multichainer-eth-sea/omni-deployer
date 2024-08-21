@@ -27,7 +27,7 @@ export const lzChainMetadata: Record<
   110: {
     name: "Arbitrum",
     chainId: EVMChainId.ARBITRUM,
-    imgUrl: "https://icons.llamao.fi/icons/chains/rsz_arbitrum?w=48&h=48",
+    imgUrl: "https://cryptologos.cc/logos/arbitrum-arb-logo.png?v=033",
     explorerUrl: "https://arbiscan.io",
   },
   111: {

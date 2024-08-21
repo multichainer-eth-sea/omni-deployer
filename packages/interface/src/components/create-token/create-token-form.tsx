@@ -21,15 +21,20 @@ import {
   useVerifyRemote,
 } from "@/hooks/use-verify-remote";
 import { OMNI_FACTORY_ABI } from "@/lib/abi/evm";
-import { denormalize } from "@/lib/common/bignumber";
+import { denormalize, valueToBigNumber } from "@/lib/common/bignumber";
 import {
   EVM_CHAIN_ID_TO_LZ,
-  EVMChainId,
   LZ_TO_EVM_CHAIN_ID,
   lzChainMetadata,
 } from "@/lib/network/chain-id";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Terminal } from "lucide-react";
+import {
+  Check,
+  Globe,
+  Globe2,
+  Sprout,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { decodeEventLog } from "viem";
@@ -57,7 +62,6 @@ const _deploymentId = "";
 
 export function CreateTokenForm() {
   const [deploymentId, setDeploymentId] = useState(_deploymentId);
-  const [verifiedChains, setVerifiedChains] = useState(["", ""]);
   const { address, chainId: evmChainId } = useAccount();
   const client = useClient();
   const {
@@ -112,6 +116,14 @@ export function CreateTokenForm() {
   const { data: remoteDeploymentFee } = useSimulateDeployOFT(
     defaultRemoteDeploymentConfigs,
   );
+
+  const totalFee = useMemo(() => {
+    if (!remoteDeploymentFee) return 0;
+
+    return remoteDeploymentFee
+      .reduce((acc, fee) => acc.plus(fee.feeFmt), valueToBigNumber(0))
+      .toFixed(6);
+  }, [remoteDeploymentFee]);
 
   async function onSubmit(formData: z.infer<typeof FormSchema>) {
     const decimal = Number(formData.decimal);
@@ -175,11 +187,19 @@ export function CreateTokenForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Token Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Omnicat" {...field} />
-                      </FormControl>
-                      <FormDescription>Name of the Token</FormDescription>
-                      <FormMessage />
+                      {deploymentId ? (
+                        <p className="text-md text-muted-foreground">
+                          {field.value}
+                        </p>
+                      ) : (
+                        <>
+                          <FormControl>
+                            <Input placeholder="Omnicat" {...field} />
+                          </FormControl>
+                          <FormDescription>Name of the Token</FormDescription>
+                          <FormMessage />
+                        </>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -189,13 +209,21 @@ export function CreateTokenForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Symbol</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Omni" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Ticker symbol for the Token e.g $OMNI
-                      </FormDescription>
-                      <FormMessage />
+                      {deploymentId ? (
+                        <p className="text-md text-muted-foreground">
+                          {field.value}
+                        </p>
+                      ) : (
+                        <>
+                          <FormControl>
+                            <Input placeholder="Omni" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Ticker symbol for the Token e.g $OMNI
+                          </FormDescription>
+                          <FormMessage />
+                        </>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -205,15 +233,25 @@ export function CreateTokenForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Token Decimal</FormLabel>
-                      <FormControl>
-                        <NumericalInput
-                          placeholder="18"
-                          maxDecimal={0}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>Decimal for the token</FormDescription>
-                      <FormMessage />
+                      {deploymentId ? (
+                        <p className="text-md text-muted-foreground">
+                          {field.value}
+                        </p>
+                      ) : (
+                        <>
+                          <FormControl>
+                            <NumericalInput
+                              placeholder="18"
+                              maxDecimal={0}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Decimal for the token
+                          </FormDescription>
+                          <FormMessage />
+                        </>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -223,54 +261,70 @@ export function CreateTokenForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Total Supply</FormLabel>
-                      <FormControl>
-                        <NumericalInput
-                          placeholder="1000000"
-                          maxDecimal={0}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Total Supply of the Token
-                      </FormDescription>
-                      <FormMessage />
+
+                      {deploymentId ? (
+                        <p className="text-md text-muted-foreground">
+                          {field.value}
+                        </p>
+                      ) : (
+                        <>
+                          <FormControl>
+                            <NumericalInput
+                              placeholder="1000000"
+                              maxDecimal={0}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Total Supply of the Token
+                          </FormDescription>
+                          <FormMessage />
+                        </>
+                      )}
                     </FormItem>
                   )}
                 />
+                <Alert>
+                  <Sprout className="h-4 w-4" />
+                  <AlertTitle>Token Created</AlertTitle>
+                </Alert>
               </div>
             </CardContent>
           </Card>
           <DeployProgress
             deploymentId={deploymentId}
             remoteDeploymentConfigs={defaultRemoteDeploymentConfigs}
-            verifiedChains={verifiedChains}
-            setVerifiedChains={setVerifiedChains}
             createTokenButton={
               hash ? (
                 <Alert>
-                  <Terminal className="h-4 w-4" />
+                  <Check className="h-4 w-4" />
                   <AlertTitle>Success</AlertTitle>
                   <AlertDescription>
                     View your transaction{" "}
                     <a
                       className="underline"
                       target="_blank"
-                      href={`https://arbiscan.io/tx/${hash}`}
+                      href={`https://layerzeroscan.com/tx/${hash}`}
                     >
                       here
                     </a>
                   </AlertDescription>
                 </Alert>
               ) : (
-                <CheckerConnect className="w-full">
-                  <Button
-                    loading={isDeployPending}
-                    className="w-full"
-                    type="submit"
-                  >
-                    {isDeployPending ? "Creating Token..." : "Create Token"}
-                  </Button>
-                </CheckerConnect>
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium leading-none">
+                    Omni Deployment Fee: {totalFee}
+                  </p>
+                  <CheckerConnect className="w-full">
+                    <Button
+                      loading={isDeployPending}
+                      className="w-full"
+                      type="submit"
+                    >
+                      {isDeployPending ? "Creating Token..." : "Create Token"}
+                    </Button>
+                  </CheckerConnect>
+                </div>
               )
             }
           />
@@ -282,16 +336,13 @@ export function CreateTokenForm() {
 function DeployProgress({
   deploymentId,
   remoteDeploymentConfigs,
-  verifiedChains,
-  setVerifiedChains,
   createTokenButton,
 }: {
   deploymentId: string;
   remoteDeploymentConfigs: RemoteDeploymentConfig[];
-  verifiedChains: string[];
-  setVerifiedChains: (params: (value: string[]) => string[]) => void;
   createTokenButton?: React.ReactNode;
 }) {
+  const [verifiedChains, setVerifiedChains] = useState(["", ""]);
   const { isPending, verifyRemoteCoinDeployment } =
     useVerifyRemote(deploymentId);
   const {
@@ -337,24 +388,33 @@ function DeployProgress({
         {remoteDeploymentConfigs.length > 0 &&
           remoteDeploymentConfigs.map((config, index) => (
             <div className="flex flex-col justify-between gap-2" key={index}>
-              <div className="flex items-center gap-2">
-                <img
-                  src={lzChainMetadata[config.remoteChainId].imgUrl}
-                  className="h-8 w-8"
-                  alt="logo"
-                />
-                <p className="text-sm text-foreground/60">
-                  {lzChainMetadata[config.remoteChainId].name}
-                </p>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={lzChainMetadata[config.remoteChainId].imgUrl}
+                    className="h-8 w-8"
+                    alt="logo"
+                  />
+                  <p className="text-sm text-foreground/60">
+                    {lzChainMetadata[config.remoteChainId].name}
+                  </p>
+                </div>
+                {!!verifiedChains[index] && (
+                  <div className="flex items-center gap-1 rounded-xl bg-black p-2">
+                    <p className="text-xs font-medium leading-none text-white">
+                      verified
+                    </p>
+                    <a
+                      className="text-white"
+                      target="_blank"
+                      href={`https://layerzeroscan.com/tx/${verifiedChains[index]}`}
+                    >
+                      <SquareArrowOutUpRight className="h-4 w-4" />
+                    </a>
+                  </div>
+                )}
               </div>
-              {verifiedChains[index] ? (
-                <a
-                  href={`${lzChainMetadata[config.remoteChainId].explorerUrl}/tx/${verifiedChains[index]}`}
-                  className="text-sm text-foreground/60 underline"
-                >
-                  view transaction
-                </a>
-              ) : (
+              {!verifiedChains[index] && (
                 <CheckerConnect
                   disabled={!deploymentId}
                   requiredChainId={LZ_TO_EVM_CHAIN_ID[config.remoteChainId]}
@@ -362,7 +422,8 @@ function DeployProgress({
                   <Button
                     loading={isPending || isRefetching}
                     disabled={!deploymentId}
-                    onClick={async () => {
+                    onClick={async (e) => {
+                      e.preventDefault();
                       if (!verifyNativeFees) return;
 
                       await refetch();

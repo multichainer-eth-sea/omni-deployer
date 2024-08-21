@@ -60,7 +60,7 @@ export function useEstimateVerifyOFT(deploymentId: string, chainIds: number[]) {
   const { chainId: inboundChainId } = useAccount();
 
   return useQuery({
-    queryKey: ["estimate-verify-oft", inboundChainId, chainIds],
+    queryKey: ["estimate-verify-oft", inboundChainId, chainIds, deploymentId],
     queryFn: async () => {
       if (!inboundChainId) {
         return;
