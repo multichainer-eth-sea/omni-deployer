@@ -9,6 +9,10 @@ export const LZ_TO_EVM_CHAIN_ID: Record<number, number> = {
   111: EVMChainId.OPTIMISM,
 };
 
+export const EVM_CHAIN_ID_TO_LZ: Record<number, number> = Object.fromEntries(
+  Object.entries(LZ_TO_EVM_CHAIN_ID).map(([k, v]) => [v, parseInt(k)]),
+);
+
 // https://icons.llamao.fi/icons/chains/rsz_base?w=48&h=48
 
 export const lzChainMetadata: Record<

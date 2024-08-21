@@ -23,6 +23,7 @@ import {
 import { OMNI_FACTORY_ABI } from "@/lib/abi/evm";
 import { denormalize } from "@/lib/common/bignumber";
 import {
+  EVM_CHAIN_ID_TO_LZ,
   EVMChainId,
   LZ_TO_EVM_CHAIN_ID,
   lzChainMetadata,
@@ -57,7 +58,7 @@ const _deploymentId = "";
 export function CreateTokenForm() {
   const [deploymentId, setDeploymentId] = useState(_deploymentId);
   const [verifiedChains, setVerifiedChains] = useState(["", ""]);
-  const { address } = useAccount();
+  const { address, chainId: evmChainId } = useAccount();
   const client = useClient();
   const {
     data: hash,
@@ -77,25 +78,35 @@ export function CreateTokenForm() {
 
   const defaultRemoteDeploymentConfigs: RemoteDeploymentConfig[] =
     useMemo(() => {
-      if (!address) {
-        return [];
-      }
+      if (!address) return [];
 
-      return [
+      const inBoundSupplyAmount = denormalize(
+        form.getValues("totalSupply"),
+        Number(form.getValues("decimal")),
+      );
+
+      const defaults = [
         {
           remoteChainId: 110,
           receiver: address,
-          remoteSupplyAmount: denormalize(
-            form.getValues("totalSupply"),
-            Number(form.getValues("decimal")),
-          ),
+          remoteSupplyAmount: "0",
         },
         {
           remoteChainId: 111,
           receiver: address,
-          remoteSupplyAmount: 0,
+          remoteSupplyAmount: "0",
         },
       ];
+
+      const currentChainId = EVM_CHAIN_ID_TO_LZ[evmChainId || -1];
+
+      return defaults.map((config) => {
+        return {
+          ...config,
+          remoteSupplyAmount:
+            config.remoteChainId === currentChainId ? inBoundSupplyAmount : "0",
+        };
+      });
     }, [address, form.getValues("totalSupply"), form.getValues("decimal")]);
 
   const { data: remoteDeploymentFee } = useSimulateDeployOFT(
@@ -106,19 +117,12 @@ export function CreateTokenForm() {
     const decimal = Number(formData.decimal);
     const totalSupplyBN = denormalize(formData.totalSupply, decimal);
 
-    if (!address) {
-      return;
-    }
+    if (!address) return;
+    if (!client) return;
+    if (!remoteDeploymentFee) return;
+    if (!evmChainId) return;
 
-    if (!client) {
-      return;
-    }
-
-    if (!remoteDeploymentFee) {
-      return;
-    }
-
-    const txParams = deployOFT(EVMChainId.ARBITRUM, {
+    const txParams = deployOFT(evmChainId, {
       tokenName: formData.tokenName,
       tokenSymbol: formData.tokenSymbol,
       decimal,
