@@ -36,4 +36,10 @@ export const lzChainMetadata: Record<
     imgUrl: "https://icons.llamao.fi/icons/chains/rsz_optimism?w=48&h=48",
     explorerUrl: "https://optimistic.etherscan.io",
   },
+  108: {
+    name: "APTOS",
+    chainId: 108,
+    imgUrl: "https://cryptologos.cc/logos/aptos-apt-logo.png?v=033",
+    explorerUrl: "https://explorer.aptoslabs.com",
+  },
 };
