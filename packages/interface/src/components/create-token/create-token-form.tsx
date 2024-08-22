@@ -462,10 +462,7 @@ function DeployProgress({
             </div>
           </div>
 
-          <CheckerConnect
-            disabled={!deploymentId}
-            requiredChainId={LZ_TO_EVM_CHAIN_ID[108]}
-          >
+          <CheckerConnect disabled={!deploymentId} requiredChainId={108}>
             <Button
               loading={isPending || isRefetching}
               disabled={!deploymentId}

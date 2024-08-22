@@ -29,6 +29,8 @@ import {
 import { NumericalInput } from "../ui/numerical-input";
 import { useEstimateSend, useSendFrom } from "@/hooks/use-bridge";
 import { useMemo } from "react";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Check } from "lucide-react";
 
 const FormSchema = z.object({
   inChainId: z.number(),
@@ -42,7 +44,7 @@ export function BridgeTokenForm() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      tokenAddress: "0x07a4Ffd0b621372A7F433Bbfa5a9c27f8e7D3e82",
+      tokenAddress: "0x75f21de928453fF8f2A5871EaB7dDCE364d00a83",
       inChainId: 110,
       outChainId: 111,
       amount: "1",
@@ -50,7 +52,7 @@ export function BridgeTokenForm() {
   });
 
   const amountBI = useMemo(
-    () => valueToBigInt(denormalize(form.getValues().amount, 18)),
+    () => valueToBigInt(denormalize(form.getValues().amount ?? "0", 18)),
     [form.getValues().amount],
   );
 
@@ -61,7 +63,7 @@ export function BridgeTokenForm() {
     amount: amountBI,
   });
 
-  const { sendFrom, isPending } = useSendFrom({
+  const { hash, sendFrom, isPending } = useSendFrom({
     amount: amountBI,
     nativeFee: data?.nativeFee,
     outChainId: form.getValues().outChainId,
@@ -75,7 +77,6 @@ export function BridgeTokenForm() {
 
   async function onSubmit(formData: z.infer<typeof FormSchema>) {
     await refetch();
-    console.log("formData", formData);
     sendFrom();
   }
 
@@ -145,14 +146,33 @@ export function BridgeTokenForm() {
               <p className="text-sm font-medium leading-none">
                 Fee: {data?.nativeFeeFmt}
               </p>
-              <CheckerConnect
-                className="w-full"
-                requiredChainId={LZ_TO_EVM_CHAIN_ID[form.getValues().inChainId]}
-              >
-                <Button className="w-full" type="submit">
-                  Bridge
-                </Button>
-              </CheckerConnect>
+              {hash ? (
+                <Alert>
+                  <Check className="h-4 w-4" />
+                  <AlertTitle>Success</AlertTitle>
+                  <AlertDescription>
+                    View your transaction{" "}
+                    <a
+                      className="underline"
+                      target="_blank"
+                      href={`https://layerzeroscan.com/tx/${hash}`}
+                    >
+                      here
+                    </a>
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <CheckerConnect
+                  className="w-full"
+                  requiredChainId={
+                    LZ_TO_EVM_CHAIN_ID[form.getValues().inChainId]
+                  }
+                >
+                  <Button loading={isPending} className="w-full" type="submit">
+                    Bridge
+                  </Button>
+                </CheckerConnect>
+              )}
             </div>
           </CardContent>
         </Card>

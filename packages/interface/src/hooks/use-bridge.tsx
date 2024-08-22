@@ -1,3 +1,4 @@
+import { useToast } from "@/components/ui/use-toast";
 import { OMNI_COIN_ABI } from "@/lib/abi/evm";
 import { normalize, valueToBigInt } from "@/lib/common/bignumber";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -74,7 +75,8 @@ export function useSendFrom({
   amount?: bigint;
   nativeFee?: bigint;
 }) {
-  const { isPending, sendTransaction } = useSendTransaction();
+  const { toast } = useToast();
+  const { data: hash, isPending, sendTransaction } = useSendTransaction();
 
   function sendFrom() {
     if (!tokenAddress) return;
@@ -100,14 +102,25 @@ export function useSendFrom({
       ],
     });
 
-    sendTransaction({
-      to: tokenAddress as Address,
-      data,
-      value: nativeFee ?? valueToBigInt(0),
-    });
+    sendTransaction(
+      {
+        to: tokenAddress as Address,
+        data,
+        value: nativeFee ?? valueToBigInt(0),
+      },
+      {
+        onSuccess: (hash) => {
+          toast({
+            title: "Success",
+            description: "Successfully bridge token",
+          });
+        },
+      },
+    );
   }
 
   return {
+    hash,
     isPending,
     sendFrom,
   };
