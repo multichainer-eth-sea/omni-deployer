@@ -284,10 +284,12 @@ export function CreateTokenForm() {
                     </FormItem>
                   )}
                 />
-                <Alert>
-                  <Sprout className="h-4 w-4" />
-                  <AlertTitle>Token Created</AlertTitle>
-                </Alert>
+                {hash && (
+                  <Alert>
+                    <Sprout className="h-4 w-4" />
+                    <AlertTitle>Token Created</AlertTitle>
+                  </Alert>
+                )}
               </div>
             </CardContent>
           </Card>

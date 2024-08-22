@@ -10,3 +10,11 @@ const OMNI_FACTORY_INTERFACE = [
 ] as const;
 
 export const OMNI_FACTORY_ABI = parseAbi(OMNI_FACTORY_INTERFACE);
+
+const OMNI_COIN_INTERFACE = [
+  "function estimateSendFee(uint16 _dstChainId, bytes32 _toAddress, uint _amount, bool _useZro, bytes _adapterParams) public view returns (uint nativeFee, uint zroFee)",
+  "function sendFrom( address _from, uint16 _dstChainId, bytes32 _toAddress, uint _amount, LzCallParams _callParams) public payable",
+  "struct LzCallParams { address refundAddress; address zroPaymentAddress; bytes adapterParams; }",
+] as const;
+
+export const OMNI_COIN_ABI = parseAbi(OMNI_COIN_INTERFACE);

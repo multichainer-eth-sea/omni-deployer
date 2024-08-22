@@ -27,14 +27,14 @@ import {
   CardTitle,
 } from "../ui/card";
 import { NumericalInput } from "../ui/numerical-input";
+import { useEstimateSend, useSendFrom } from "@/hooks/use-bridge";
+import { useMemo } from "react";
 
 const FormSchema = z.object({
   inChainId: z.number(),
   outChainId: z.number(),
   tokenAddress: z.string(),
   amount: z.string(),
-  senderAddress: z.string(),
-  receiverAddress: z.string(),
 });
 
 export function BridgeTokenForm() {
@@ -42,16 +42,42 @@ export function BridgeTokenForm() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      tokenAddress: "0xB9b3991e80Db972237ee253536495158faB4dE88",
+      tokenAddress: "0x07a4Ffd0b621372A7F433Bbfa5a9c27f8e7D3e82",
       inChainId: 110,
       outChainId: 111,
-      amount: "100",
-      senderAddress: address,
-      receiverAddress: address,
+      amount: "1",
     },
   });
 
-  async function onSubmit(formData: z.infer<typeof FormSchema>) {}
+  const amountBI = useMemo(
+    () => valueToBigInt(denormalize(form.getValues().amount, 18)),
+    [form.getValues().amount],
+  );
+
+  const { data, error, refetch } = useEstimateSend({
+    tokenAddress: form.getValues().tokenAddress,
+    outChainId: form.getValues().outChainId,
+    toAddress: address,
+    amount: amountBI,
+  });
+
+  const { sendFrom, isPending } = useSendFrom({
+    amount: amountBI,
+    nativeFee: data?.nativeFee,
+    outChainId: form.getValues().outChainId,
+    toAddress: address,
+    tokenAddress: form.getValues().tokenAddress,
+  });
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  async function onSubmit(formData: z.infer<typeof FormSchema>) {
+    await refetch();
+    console.log("formData", formData);
+    sendFrom();
+  }
 
   return (
     <Form {...form}>
@@ -116,6 +142,9 @@ export function BridgeTokenForm() {
                 )}
               />
 
+              <p className="text-sm font-medium leading-none">
+                Fee: {data?.nativeFeeFmt}
+              </p>
               <CheckerConnect
                 className="w-full"
                 requiredChainId={LZ_TO_EVM_CHAIN_ID[form.getValues().inChainId]}
