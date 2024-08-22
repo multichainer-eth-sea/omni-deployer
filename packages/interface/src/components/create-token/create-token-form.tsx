@@ -448,6 +448,49 @@ function DeployProgress({
               )}
             </div>
           ))}
+        <div className="flex flex-col justify-between gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <img
+                src={lzChainMetadata[108].imgUrl}
+                className="h-8 w-8"
+                alt="logo"
+              />
+              <p className="text-sm text-foreground/60">
+                {lzChainMetadata[108].name}
+              </p>
+            </div>
+          </div>
+
+          <CheckerConnect
+            disabled={!deploymentId}
+            requiredChainId={LZ_TO_EVM_CHAIN_ID[108]}
+          >
+            <Button
+              loading={isPending || isRefetching}
+              disabled={!deploymentId}
+              onClick={async (e) => {
+                e.preventDefault();
+                if (!verifyNativeFees) return;
+
+                await refetch();
+                verifyRemoteCoinDeployment(
+                  [110, 111],
+                  verifyNativeFees as bigint[],
+                  (hash) => {
+                    setVerifiedChains((prev: string[]) => {
+                      const copy = [...prev];
+                      copy[0] = hash;
+                      return copy;
+                    });
+                  },
+                );
+              }}
+            >
+              Verify Token
+            </Button>
+          </CheckerConnect>
+        </div>
       </CardContent>
     </Card>
   );
